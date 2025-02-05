@@ -27,15 +27,32 @@ function Tasks() {
 
   // Load tasks from the database on component mount
   useEffect(() => {
-    fetchTasks();
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) throw new Error('User not found in local storage');
+      fetchTasks(user.user_id);
+    } catch (error) {
+      console.error('Error fetching task:', error);
+    }
   }, []);
 
   // Fetch all tasks from the database
-  const fetchTasks = async () => {
+  // const fetchTasks = async (userId) => {
+  //   try {
+  //     // const response = await axios.get('https://server-bashboard.vercel.app/apis/tasks',{userId: userId});
+  //     const response = await axios.get('http://localhost:3000/apis/tasks',{userId: userId});
+  //     console.log(response.data)
+  //     setTasks(response.data);
+  //   } catch (error) {
+  //     console.error('Error fetching tasks:', error);
+  //   }
+  // };
+
+  const fetchTasks = async (userId) => {
     try {
-      const response = await axios.get('https://server-bashboard.vercel.app/apis/tasks');
-      // const response = await axios.get('http://localhost:3000/apis/tasks');
-      console.log(response.data)
+      const response = await axios.get(`https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`);
+      // const response = await axios.get(`http://localhost:3000/apis/tasks?userId=${userId}`);
+      console.log(response.data);
       setTasks(response.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -48,8 +65,8 @@ function Tasks() {
       const now = new Date();
       const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   
-      // const user = JSON.parse(localStorage.getItem('user'));
-      // if (!user) throw new Error('User not found in local storage');
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) throw new Error('User not found in local storage');
       const taskData = {
         task_id: uuidv4(),
         task_name: newTask.task_name,
@@ -61,13 +78,13 @@ function Tasks() {
         moved_to: '',
         is_in_progress: false,
         is_complete: false,
-        // user_id: user.id,
-        user_id: "7ebd7234-6bc0-4a26-a334-484d110f13d0",
+        user_id: user.user_id,
+        // user_id: "7ebd7234-6bc0-4a26-a334-484d110f13d0",
       };
       await axios.post('https://server-bashboard.vercel.app/apis/tasks', taskData);
       // await axios.post('http://localhost:3000/apis/tasks', taskData);
       setIsAddingTask(false);
-      fetchTasks();
+      fetchTasks(user.user_id);
     } catch (error) {
       console.error('Error adding task:', error);
     }
@@ -83,12 +100,15 @@ function Tasks() {
   const handleSaveEdit = async (updatedTask) => {
     console.log(updatedTask);
     try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) throw new Error('User not found in local storage');
       await axios.put(
         `https://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`,
+        // `http://localhost:3000/apis/tasks/${updatedTask.task_id}`,
         updatedTask
       );
       setIsEditingTask(false); // Close the edit dialog
-      fetchTasks(); // Refresh the task list
+      fetchTasks(user.user_id); // Refresh the task list
     } catch (error) {
       console.error('Error updating task:', error);
     }
@@ -97,8 +117,11 @@ function Tasks() {
   // Delete a task from the database
   const handleDeleteTask = async (task) => {
     try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) throw new Error('User not found in local storage');
       await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
-      fetchTasks();
+      // await axios.delete(`http://localhost:3000/apis/tasks/${task.task_id}`);
+      fetchTasks(user.user_id);
     } catch (error) {
       console.error('Error deleting task:', error);
     }
@@ -119,6 +142,8 @@ function Tasks() {
   // Confirm moving a task to a session
   const handleMoveTaskConfirm = async (sessionId) => {
     try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user) throw new Error('User not found in local storage');
       const updatedTask = {
         ...taskToMove,
         coming_from: sessionId,
@@ -126,10 +151,11 @@ function Tasks() {
       };
       await axios.put(
         `https://server-bashboard.vercel.app/apis/tasks/${taskToMove.task_id}`,
+        // `http://localhost:3000/apis/tasks/${taskToMove.task_id}`,
         updatedTask
       );
       setIsMovingTask(false); // Close the move dialog
-      fetchTasks(); // Refresh the task list
+      fetchTasks(user.user_id); // Refresh the task list
     } catch (error) {
       console.error('Error moving task:', error);
     }

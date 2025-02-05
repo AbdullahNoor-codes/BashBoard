@@ -25,31 +25,30 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/login" element={<Login />} />
-          
-          {/* <Route
+          <Route
             path="/"
             element={isAuthenticated() ? <Tasks /> : <Navigate to="/login" />}
-          /> */}
-          <Route
+          />
+          {/* <Route
             path="/"
             element={<Tasks />}
-          />
-          {/* <Route
+          /> */}
+          <Route
             path="/sessions"
             element={isAuthenticated() ? <Objectives /> : <Navigate to="/login" />}
-          /> */}
-          <Route
+          />
+          {/* <Route
             path="/sessions"
             element={<Objectives />}
+          /> */}
+          <Route
+            path="/reports"
+            element={isAuthenticated() ? <Reports /> : <Navigate to="/login" />}
           />
           {/* <Route
             path="/reports"
-            element={isAuthenticated() ? <Reports /> : <Navigate to="/login" />}
-          /> */}
-          <Route
-            path="/reports"
             element={<Reports />}
-          />
+          /> */}
         </Routes>
       </Layout>
     </Router>
