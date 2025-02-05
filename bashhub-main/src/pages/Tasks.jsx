@@ -57,7 +57,7 @@ function Tasks() {
         task_time: localDate,
         // task_time: "2025-02-02 08:30:15.26",
         // task_level: newTask.task_level,
-        coming_from: '',
+        coming_from: 'current-tasks',
         moved_to: '',
         is_in_progress: false,
         is_complete: false,
@@ -141,8 +141,8 @@ function Tasks() {
     // console.log(tasks);
     const today = new Date();
     return {
-      todayTasks: tasks.filter(task => isSameDay(new Date(task.task_time), today) && !task.is_complete),
-      olderTasks: tasks.filter(task => !isSameDay(new Date(task.task_time), today) && !task.is_complete)
+      todayTasks: tasks.filter(task => isSameDay(new Date(task.task_time), today) && !task.is_complete && task.coming_from == "current-tasks"),
+      olderTasks: tasks.filter(task => !isSameDay(new Date(task.task_time), today) && !task.is_complete && task.coming_from == "current-tasks")
     };
   };
 
