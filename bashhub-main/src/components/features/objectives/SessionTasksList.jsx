@@ -62,7 +62,7 @@ function SessionTasksList({
           )}
 
           <div>
-            <p className="font-semibold">{task.task_name}</p>
+            <p className="font-semibold line-clamp-1">{task.task_name}</p>
             <p className="text-sm text-gray-500">{new Date(task.task_time).toLocaleDateString()}</p>
             {/* <p className={`text-xs font-medium ${getPriorityColor(task.task_level)}`}>
               Priority: {task.task_level}

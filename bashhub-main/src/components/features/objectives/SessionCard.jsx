@@ -69,7 +69,7 @@ function SessionCard({ id, title, tasks, className, onAddTask, onTaskMove, handl
   return (
     <div
       ref={drop}
-      className={`min-h-[50vh] bg-white border border-gray-200 rounded-lg shadow-md shrink-0 overflow-y-auto
+      className={`min-h-[50vh] bg-white border border-gray-200 rounded-lg shadow-md shrink-0 overflow-y-auto 
         ${isOver && 'border-blue-500 border-2'} 
         ${isLocked ? 'opacity-75' : ''} 
         ${className}`}

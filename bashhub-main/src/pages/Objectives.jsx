@@ -105,8 +105,8 @@ function Objectives() {
         user_id: user.user_id,
         // user_id: "7ebd7234-6bc0-4a26-a334-484d110f13d0",
       };
-      await axios.post('https://server-bashboard.vercel.app/apis/tasks', taskData);
-      // await axios.post('http://localhost:3000/apis/tasks', taskData);
+      // await axios.post('https://server-bashboard.vercel.app/apis/tasks', taskData);
+      await axios.post('http://localhost:3000/apis/tasks', taskData);
       setIsAddingTask(false);
       fetchTasks(user.user_id); // Refresh the task list
     } catch (error) {
@@ -130,8 +130,8 @@ function Objectives() {
         moved_to: task.moved_to,
         user_id: task.user_id
       };
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
       fetchTasks(user.user_id); // Refresh the task list
     } catch (error) {
       console.error('Error marking task as complete:', error);
@@ -154,8 +154,8 @@ function Objectives() {
         is_in_progress: task.is_in_progress,
         user_id: task.user_id
       };
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
       fetchTasks(user.user_id);
     } catch (error) {
       console.error('Error marking task as uncomplete:', error);
@@ -185,8 +185,8 @@ function Objectives() {
         is_complete: taskToEdit.is_complete,
         user_id: taskToEdit.user_id
       };
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${updatedTask.task_id}`, updatedTask);
+      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${updatedTask.task_id}`, updatedTask);
       setIsEditingTask(false);
       fetchTasks(user.user_id);
     } catch (error) {
@@ -199,8 +199,8 @@ function Objectives() {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user) throw new Error('User not found in local storage');
-      await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
-      // await axios.delete(`http://localhost:3000/apis/tasks/${task.task_id}`);
+      // await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
+      await axios.delete(`http://localhost:3000/apis/tasks/${task.task_id}`);
       fetchTasks(user.user_id); // Refresh the task list
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -216,6 +216,15 @@ function Objectives() {
   // Add new function to handle task movement
   const handleTaskMove = async (taskId, targetSession) => {
     // if(targetSession)
+    const newTasks = tasks.map(t => {
+      if(t.task_id !== taskId) return t
+      return {
+        ...t,
+        coming_from: targetSession,
+        task_time: t.task_time
+      }
+    })
+    setTasks(newTasks);
     const task = tasks.find(t => t.task_id === taskId);
     if (!task) return;
     console.log(task.task_time);
@@ -225,11 +234,11 @@ function Objectives() {
       const updatedTask = {
         ...task,
         coming_from: targetSession,
-        // Don't update task_time here to preserve original date
+        task_time: task.task_time
       };
       console.log(updatedTask.task_time);
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
       fetchTasks(user.user_id);
     } catch (error) {
       console.error('Error moving task:', error);
@@ -245,8 +254,8 @@ function Objectives() {
         ...task,
         is_in_progress: true
       };
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
       fetchTasks(user.user_id);
     } catch (error) {
       console.error('Error setting task in progress:', error);
@@ -348,7 +357,7 @@ function Objectives() {
               id={session.id}
               title={session.title}
               tasks={filterTodaysTasks(session.id)}
-              className="min-w-[400px]"
+              className="min-w-[400px] max-w-[400px]"
               onAddTask={(sessionId) => {
                 setSelectedSessionId(sessionId);
                 setIsAddingTask(true);

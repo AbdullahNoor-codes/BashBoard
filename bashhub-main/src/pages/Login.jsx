@@ -25,10 +25,10 @@ const Login = () => {
             if (response.data.message === 'Login successful') {
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('user', JSON.stringify(response.data.user)); // Store user data
-                navigate('/');
             } else {
                 setError('Invalid credentials');
             }
+            navigate('/');
         } catch (err) {
             // Handle errors (e.g., network error, invalid credentials)
             if (err.response && err.response.data.message) {

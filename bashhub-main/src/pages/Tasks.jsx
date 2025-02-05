@@ -81,8 +81,8 @@ function Tasks() {
         user_id: user.user_id,
         // user_id: "7ebd7234-6bc0-4a26-a334-484d110f13d0",
       };
-      await axios.post('https://server-bashboard.vercel.app/apis/tasks', taskData);
-      // await axios.post('http://localhost:3000/apis/tasks', taskData);
+      // await axios.post('https://server-bashboard.vercel.app/apis/tasks', taskData);
+      await axios.post('http://localhost:3000/apis/tasks', taskData);
       setIsAddingTask(false);
       fetchTasks(user.user_id);
     } catch (error) {
@@ -103,8 +103,8 @@ function Tasks() {
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user) throw new Error('User not found in local storage');
       await axios.put(
-        `https://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`,
-        // `http://localhost:3000/apis/tasks/${updatedTask.task_id}`,
+        // `https://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`,
+        `http://localhost:3000/apis/tasks/${updatedTask.task_id}`,
         updatedTask
       );
       setIsEditingTask(false); // Close the edit dialog
@@ -119,8 +119,8 @@ function Tasks() {
     try {
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user) throw new Error('User not found in local storage');
-      await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
-      // await axios.delete(`http://localhost:3000/apis/tasks/${task.task_id}`);
+      // await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
+      await axios.delete(`http://localhost:3000/apis/tasks/${task.task_id}`);
       fetchTasks(user.user_id);
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -150,8 +150,8 @@ function Tasks() {
         task_time: new Date().toISOString() // Set to today's date when moving
       };
       await axios.put(
-        `https://server-bashboard.vercel.app/apis/tasks/${taskToMove.task_id}`,
-        // `http://localhost:3000/apis/tasks/${taskToMove.task_id}`,
+        // `https://server-bashboard.vercel.app/apis/tasks/${taskToMove.task_id}`,
+        `http://localhost:3000/apis/tasks/${taskToMove.task_id}`,
         updatedTask
       );
       setIsMovingTask(false); // Close the move dialog
