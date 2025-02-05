@@ -44,7 +44,7 @@ function SessionCard({ id, title, tasks, className, onAddTask, onTaskMove, handl
       };
 
       // Make the API call to update tasks in bulk
-      const response = await axios.post('http://server-bashboard.vercel.app/apis/tasks/bulk-update', requestBody);
+      const response = await axios.post('https://server-bashboard.vercel.app/apis/tasks/bulk-update', requestBody);
       const fetchedTasks = response.data;
       handleTasksUpdated(fetchedTasks);
       console.log("Tasks moved to current-tasks successfully");

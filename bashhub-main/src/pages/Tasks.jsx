@@ -84,7 +84,7 @@ function Tasks() {
     console.log(updatedTask);
     try {
       await axios.put(
-        `http://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`,
+        `https://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`,
         updatedTask
       );
       setIsEditingTask(false); // Close the edit dialog
@@ -97,7 +97,7 @@ function Tasks() {
   // Delete a task from the database
   const handleDeleteTask = async (task) => {
     try {
-      await axios.delete(`http://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
+      await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
       fetchTasks();
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -125,7 +125,7 @@ function Tasks() {
         task_time: new Date().toISOString() // Set to today's date when moving
       };
       await axios.put(
-        `http://server-bashboard.vercel.app/apis/tasks/${taskToMove.task_id}`,
+        `https://server-bashboard.vercel.app/apis/tasks/${taskToMove.task_id}`,
         updatedTask
       );
       setIsMovingTask(false); // Close the move dialog
