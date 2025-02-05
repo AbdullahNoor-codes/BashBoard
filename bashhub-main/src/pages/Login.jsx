@@ -4,7 +4,7 @@ import axios from 'axios'; // Import Axios
 import { Button } from '@/components/ui/button';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -14,9 +14,9 @@ const Login = () => {
 
         try {
             // Make a POST request to the /login API endpoint
-            const response = await axios.post('https://server-bashboard.vercel.app/login', {
-                // const response = await axios.post('http://localhost:3000/login', {
-                email,
+            // const response = await axios.post('https://server-bashboard.vercel.app/login', {
+                const response = await axios.post('http://localhost:3000/login', {
+                    username,
                 password,
             });
 
@@ -46,10 +46,10 @@ const Login = () => {
                 </div>
                 {error && <div className="mb-4 text-red-500 text-sm md:text-base">{error}</div>}
                 <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     className="w-full p-2 md:p-3 mb-4 border rounded bg-gray-100 border-gray-300 text-black text-sm md:text-base"
                 />
                 <input
