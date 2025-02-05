@@ -14,8 +14,8 @@ const Login = () => {
 
         try {
             // Make a POST request to the /login API endpoint
-            // const response = await axios.post('https://server-bashboard.vercel.app/login', {
-                const response = await axios.post('http://localhost:3000/login', {
+            const response = await axios.post('https://server-bashboard.vercel.app/login', {
+                // const response = await axios.post('http://localhost:3000/login', {
                     username,
                 password,
             });
@@ -39,7 +39,8 @@ const Login = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-white text-black p-4">
+        <div>
+            <div className="flex items-center justify-center min-h-screen bg-white text-black p-4">
             <div className="w-full max-w-sm md:max-w-md lg:max-w-lg p-6 bg-gray-200 rounded-lg shadow-md">
                 <div className="h-16 flex items-center border-b border-gray-200 mb-6">
                     <span className="text-xl md:text-2xl font-semibold">Login</span>
@@ -67,6 +68,7 @@ const Login = () => {
                     Login
                 </Button>
             </div>
+        </div>
         </div>
     );
 };

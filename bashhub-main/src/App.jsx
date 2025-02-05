@@ -10,7 +10,7 @@ import NotificationService from '@/utils/NotificationService';
 // Utility function to check if the user is authenticated
 const isAuthenticated = () => {
   // For demonstration purposes, we'll use localStorage to store an "authToken".
-  return !!localStorage.getItem("isLoggedIn");
+  return localStorage.getItem("isLoggedIn");
 };
 
 function App() {
