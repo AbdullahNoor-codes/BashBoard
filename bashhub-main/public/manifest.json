@@ -1,0 +1,16 @@
+{
+  "name": "DWS Module",
+  "short_name": "DWS",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "permissions": ["notifications"],
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

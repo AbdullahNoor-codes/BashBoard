@@ -1,0 +1,96 @@
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { MoreVertical, Pencil, FolderInput, Trash, Eye } from 'lucide-react';
+
+function TaskList({ tasks, onEdit, onView, onMove, onDelete }) {
+  return (
+    <div className="space-y-4">
+      {tasks.map((task) => (
+        <div
+          key={task.task_id}
+          className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm ${
+            task.is_complete ? 'bg-gray-50' : ''
+          }`}
+        >
+          <div className="flex justify-between items-start items-center">
+            <div className="flex-1">
+              <h3 className={`font-medium ${
+                task.is_complete ? 'line-through text-gray-500' : ''
+              }`}>
+                {task.task_name}
+              </h3>
+              {/* <p className={`text-sm text-gray-600 mt-1 ${
+                task.is_complete ? 'line-through' : ''
+              }`}>
+                {task.task_description}
+              </p> */}
+              <div className="flex items-center space-x-4 text-sm">
+                {/* <span className={getPriorityBadgeClass(task.task_level)}>
+                  {task.task_level}
+                </span> */}
+                <span className="text-gray-500">
+                  {new Date(task.task_time).toLocaleDateString()}
+                </span>
+                {task.is_in_progress && (
+                  <span className="text-blue-600">In Progress</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onView(task)}>
+                    <Eye className="w-4 h-4 mr-2" />
+                    View
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onEdit(task)}>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onMove(task)}>
+                    <FolderInput className="w-4 h-4 mr-2" />
+                    Move
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => onDelete(task)}
+                    className="text-red-600"
+                  >
+                    <Trash className="w-4 h-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// const getPriorityBadgeClass = (level) => {
+//   const baseClass = "px-2 py-1 rounded-full text-xs font-medium";
+//   switch (level.toLowerCase()) {
+//     case 'high':
+//       return `${baseClass} bg-red-100 text-red-800`;
+//     case 'medium':
+//       return `${baseClass} bg-yellow-100 text-yellow-800`;
+//     case 'low':
+//       return `${baseClass} bg-green-100 text-green-800`;
+//     default:
+//       return `${baseClass} bg-gray-100 text-gray-800`;
+//   }
+// };
+
+export default TaskList;
