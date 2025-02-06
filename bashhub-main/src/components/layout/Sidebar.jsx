@@ -15,10 +15,8 @@ function Sidebar() {
   }, [location]);
 
   const handleLogout = () => {
-    toast.error('Failed to update toast');
-    
-    // localStorage.removeItem('isLoggedIn');
-    // navigate('/login');
+    localStorage.removeItem('isLoggedIn');
+    navigate('/login');
   };
 
   const toggleMobileMenu = () => {
