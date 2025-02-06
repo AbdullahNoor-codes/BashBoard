@@ -1,58 +1,3 @@
-// import { clsx } from "clsx";
-// import { twMerge } from "tailwind-merge"
-
-// // Time constants for sessions
-// export const SESSION_TIMES = {
-//   // DWS1_LOCK: '13:30',    // 1:30 PM
-//   // DWS2_LOCK: '16:00',    // 4:00 PM
-//   // DWS3_LOCK: '18:00',    // 6:00 PM
-//   // ALL_UNLOCK: '23:00',   // 11:00 PM
-
-//   DWS1_LOCK: '23:00',    // 1:30 PM
-//   DWS2_LOCK: '16:00',    // 4:00 PM
-//   DWS3_LOCK: '18:00',    // 6:00 PM
-//   ALL_UNLOCK: '01:00',   // 11:00 PM
-// };
-
-// // Check if current time is past the specified time
-// export const isPastTime = (timeString) => {
-//   const [hours, minutes] = timeString.split(':').map(Number);
-//   const now = new Date();
-//   const compareTime = new Date();
-//   compareTime.setHours(hours, minutes, 0);
-//   return now >= compareTime;
-// };
-
-// // Check if current time is within 5 minutes before the specified time
-// export const isWithin5MinutesBefore = (timeString) => {
-//   const [hours, minutes] = timeString.split(':').map(Number);
-//   const now = new Date();
-//   const compareTime = new Date();
-//   compareTime.setHours(hours, minutes, 0);
-//   const fiveMinutesBefore = new Date(compareTime.getTime() - 5 * 60000);
-//   return now >= fiveMinutesBefore && now < compareTime;
-// };
-
-// // Get session lock status
-// export const getSessionLockStatus = () => {
-//   const isUnlockTime = isPastTime(SESSION_TIMES.ALL_UNLOCK) || 
-//                       !isPastTime(SESSION_TIMES.DWS1_LOCK);
-  
-//   return {
-//     // dws1: !isUnlockTime && isPastTime(SESSION_TIMES.DWS1_LOCK),
-//     // dws2: !isUnlockTime && isPastTime(SESSION_TIMES.DWS2_LOCK),
-//     // dws3: !isUnlockTime && isPastTime(SESSION_TIMES.DWS3_LOCK),
-
-//     dws1: !isUnlockTime && isPastTime(SESSION_TIMES.DWS1_LOCK),
-//     dws2: !isUnlockTime && isPastTime(SESSION_TIMES.DWS2_LOCK),
-//     dws3: !isUnlockTime && isPastTime(SESSION_TIMES.DWS3_LOCK),
-//     rws: false, // Remote session is never locked
-//     'current-tasks': false
-//   };
-// };
-
-
-
 
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -63,6 +8,7 @@ export const SESSION_TIMES = {
   DWS2_LOCK: '16:00',    // 4:00 PM
   DWS3_LOCK: '18:00',    // 6:00 PM
   ALL_UNLOCK: '23:00',   // 11:00 PM
+  
 };
 
 // Check if the current time is past the specified time

@@ -35,20 +35,24 @@ function SessionCard({ id, title, tasks, className, onAddTask, onTaskMove, handl
     }
   }, [lockStatus[id], inProgressTasks, activeTasks]);
 
-  // Function to move tasks to "current-tasks"
   const MoveTasksToCurrentTasks = async (listOfTaskIds) => {
+    const updates= {
+      coming_from: "current-tasks", // Update the 'coming_from' field
+      is_in_progress: false,       // Optionally update other fields
+    }
+    const task_ids = listOfTaskIds;
     try {
       const requestBody = {
-        task_ids: listOfTaskIds,
-        coming_from: "current-tasks", // Update the "coming_from" field
+        task_ids,
+        updates
       };
-
-      // Make the API call to update tasks in bulk
-      const response = await axios.post('https://server-bashboard.vercel.app/apis/tasks/bulk-update', requestBody);
-      // const response = await axios.post('http://localhost:3000/apis/tasks/bulk-update', requestBody);
-      const fetchedTasks = response.data;
-      handleTasksUpdated(fetchedTasks);
+  
+      await axios.post('https://server-bashboard.vercel.app/apis/tasks/bulk-update', requestBody);
+      // await axios.post('http://localhost:3000/apis/tasks/bulk-update', requestBody);
+  
       console.log("Tasks moved to current-tasks successfully");
+      
+      handleTasksUpdated(task_ids, updates);
     } catch (error) {
       console.error("Error moving tasks to current-tasks:", error);
     }

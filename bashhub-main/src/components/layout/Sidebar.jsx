@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CheckSquare, Target, FileText, Menu, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 function Sidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,8 +15,10 @@ function Sidebar() {
   }, [location]);
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    navigate('/login');
+    toast.error('Failed to update toast');
+    
+    // localStorage.removeItem('isLoggedIn');
+    // navigate('/login');
   };
 
   const toggleMobileMenu = () => {

@@ -17,6 +17,7 @@
 import React from 'react';
 import Sidebar from './Sidebar';
 import { useLocation } from 'react-router-dom';
+import { Toaster } from 'sonner';
 
 function Layout({ children }) {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -38,6 +39,7 @@ function Layout({ children }) {
       {/* <Sidebar /> */}
       <main className={`flex-1 max-h-[100vh] overflow-auto p-4 lg:p-8 ${isLoggedIn ? 'pt-20 lg:pt-8' : ''}`}>
         {children}
+        <Toaster />
       </main>
     </div>
   );
