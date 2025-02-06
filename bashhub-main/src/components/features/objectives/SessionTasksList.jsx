@@ -6,12 +6,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Eye, Pencil, Trash, CheckCircle, Clock } from 'lucide-react';
+import { MoreVertical, Eye, Pencil, Trash, CheckCircle, Clock, Tags  } from 'lucide-react';
 
 function SessionTasksList({
   tasks, 
   onDeleteTask, 
   onEditTask, 
+  onAddTag,
   onViewTask, 
   onMarkComplete,
   onMarkUncomplete, 
@@ -45,7 +46,7 @@ function SessionTasksList({
     return (
       <div
         ref={drag}
-        className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex justify-between items-center ${
+        className={`bg-white border border-gray-200 rounded-lg px-4 py-2 shadow-sm flex justify-between items-center ${
           isDragging ? 'opacity-50' : ''
         } ${task.is_complete ? 'bg-gray-50' : ''}`}
       >
@@ -63,10 +64,26 @@ function SessionTasksList({
 
           <div>
             <p className="font-semibold line-clamp-1">{task.task_name}</p>
-            <div className="text-sm text-gray-500 line-clamp-2 overflow-hidden text-ellipsis">
+            <div className="text-sm text-gray-500 line-clamp-1 overflow-hidden text-ellipsis">
                 {task.task_desc}
               </div> 
-            <span className="text-gray-500">
+
+              {/* Render Tags */}
+            <div className="flex flex-wrap gap-2 mt-1">
+              {task.task_tags && task.task_tags.length > 0 ? (
+                task.task_tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="text-xs bg-gray-200 text-gray-800 px-2 py-0.5 rounded"
+                  >
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-gray-500">No tags</span>
+              )}
+            </div>
+            <span className="text-xs text-gray-500">
                   {task.date
                     ? new Date(task.date).toLocaleDateString("en-US", {
                         year: "numeric",
@@ -75,9 +92,6 @@ function SessionTasksList({
                       })
                     : "No Date"}
                 </span>
-            {/* <p className={`text-xs font-medium ${getPriorityColor(task.task_level)}`}>
-              Priority: {task.task_level}
-            </p> */}
           </div>
         </div>
 
@@ -104,6 +118,11 @@ function SessionTasksList({
               <DropdownMenuItem onClick={() => onEditTask(task)}>
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => onAddTag(task)}>
+                <Tags className="w-4 h-4 mr-2" />
+                Add tag
               </DropdownMenuItem>
 
               <DropdownMenuItem

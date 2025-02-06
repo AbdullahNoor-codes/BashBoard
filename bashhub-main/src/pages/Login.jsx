@@ -15,8 +15,6 @@ const Login = () => {
         try {
             // Make a POST request to the /login API endpoint
             const response = await axios.post('https://server-bashboard.vercel.app/login', {
-            // console.log(username,password);
-                // const response = await axios.post('http://localhost:3000/login', {
                     username,
                 password,
             });

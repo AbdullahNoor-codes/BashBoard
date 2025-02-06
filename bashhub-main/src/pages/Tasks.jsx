@@ -15,6 +15,7 @@ import axios from "axios";
 import { isSameDay } from "@/lib/utils";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TagsForm from "@/components/features/tasks/TagsForm";
 
 function Tasks() {
   const [tasks, setTasks] = useState([]);
@@ -25,12 +26,14 @@ function Tasks() {
   const [taskToView, setTaskToView] = useState(null);
   const [isMovingTask, setIsMovingTask] = useState(false);
   const [taskToMove, setTaskToMove] = useState(null);
+  const [taskToAddTags, setTaskTags] = useState(null);
+  const [IsAddingTag, setIsAddingTag] = useState(false);
   const lockStatus = useSessionLock();
   const [activeTab, setActiveTab] = useState("today");
 
 
   // https://server-bashboard.vercel.app/
-  // http://localhost:3000/
+  // https://server-bashboard.vercel.app/
 
   useEffect(() => {
     try {
@@ -101,6 +104,12 @@ function Tasks() {
   const handleEditTask = async (task) => {
     setIsEditingTask(true);
     setTaskToEdit(task);
+  };
+
+  const handleAddTag = (task) => {
+    console.log(task);
+    setTaskTags(task);  
+    setIsAddingTag(true);
   };
 
   const handleSaveEdit = async (updatedTask) => {
@@ -258,6 +267,7 @@ function Tasks() {
           <TaskList
             tasks={oldTasks}
             onEdit={handleEditTask}
+            onAddTag={handleAddTag}
             onView={handleViewTask}
             onMove={handleMoveTask}
             onDelete={handleDeleteTask}
@@ -268,6 +278,7 @@ function Tasks() {
 
             tasks={todayTasks}
             onEdit={handleEditTask}
+            onAddTag={handleAddTag}
             onView={handleViewTask}
             onMove={handleMoveTask}
             onDelete={handleDeleteTask}
@@ -277,6 +288,7 @@ function Tasks() {
           <TaskList
             tasks={futureTasks}
             onEdit={handleEditTask}
+            onAddTag={handleAddTag}
             onView={handleViewTask}
             onMove={handleMoveTask}
             onDelete={handleDeleteTask}
@@ -313,6 +325,22 @@ function Tasks() {
             task={taskToEdit}
             onSubmit={handleSaveEdit}
             onCancel={() => setIsEditingTask(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={IsAddingTag} onOpenChange={setIsAddingTag}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Tag</DialogTitle>
+            <DialogDescription>
+              Add Tags for the selected task.
+            </DialogDescription>
+          </DialogHeader>
+          <TagsForm
+            task={taskToAddTags}
+            onSubmit={handleSaveEdit}
+            onCancel={() => setIsAddingTag(false)}
           />
         </DialogContent>
       </Dialog>

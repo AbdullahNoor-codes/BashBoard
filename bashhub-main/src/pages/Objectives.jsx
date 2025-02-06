@@ -19,9 +19,10 @@ import { useTaskAutoMove } from '@/hooks/useTaskAutoMove';
 import { isTaskFromToday, isSameDay } from '@/lib/utils';
 import { useSessionLock } from '@/hooks/useSessionLock';
 import { toast } from 'sonner';
+import TagsForm from '@/components/features/tasks/TagsForm';
 
 //  https://server-bashboard.vercel.app/,
-//  http://localhost:3000/
+//  https://server-bashboard.vercel.app/
 
 
 
@@ -30,9 +31,11 @@ function Objectives() {
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [isEditingTask, setIsEditingTask] = useState(false);
   const [isViewingTask, setIsViewingTask] = useState(false);
+  const [IsAddingTag, setIsAddingTag] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
+  const [taskToAddTags, setTaskTags] = useState(null);
   const [taskToView, setTaskToView] = useState(null);
   const lockStatus = useSessionLock();
 
@@ -86,6 +89,7 @@ function Objectives() {
       taskData = {
         task_id: crypto.randomUUID(),
         task_name: newTask.task_name,
+        task_tags: [],
         task_desc: newTask.task_desc,
         date: newTask.date,
         coming_from: selectedSessionId,
@@ -196,6 +200,12 @@ function Objectives() {
     }
   };
 
+  const handleAddTag = (task) => {
+    console.log(task);
+    setTaskTags(task);  
+    setIsAddingTag(true);
+  };
+
   const handleDeleteTask = async (task) => {
     let loadingToastId;
     const oldtasks = tasks;
@@ -226,7 +236,6 @@ function Objectives() {
   const handleTaskMove = async (taskId, targetSession) => {
     const taskToUPdate = tasks.find(t => t.task_id === taskId);
   
-    // Check if the task exists
     if (!taskToUPdate) {
       toast.error("Task not found");
       return;
@@ -334,6 +343,7 @@ function Objectives() {
                     onDeleteTask={handleDeleteTask}
                     onEditTask={handleEditTask}
                     onViewTask={handleViewTask}
+                    onAddTag={handleAddTag}
                     onMarkComplete={handleMarkComplete}
                     onSetInProgress={handleSetInProgress}
                     onMarkUncomplete={handleMarkUncomplete}
@@ -367,6 +377,7 @@ function Objectives() {
                 tasks={filterTodaysTasks(session.id)}
                 onDeleteTask={handleDeleteTask}
                 onEditTask={handleEditTask}
+                onAddTag={handleAddTag}
                 onViewTask={handleViewTask}
                 onMarkComplete={handleMarkComplete}
                 onSetInProgress={handleSetInProgress}
@@ -406,6 +417,23 @@ function Objectives() {
             task={taskToEdit}
             onSubmit={handleSaveEdit}
             onCancel={() => setIsEditingTask(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+
+        <Dialog open={IsAddingTag} onOpenChange={setIsAddingTag}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Tag</DialogTitle>
+            <DialogDescription>
+              Add Tags for the selected task.
+            </DialogDescription>
+          </DialogHeader>
+          <TagsForm
+            task={taskToAddTags}
+            onSubmit={handleSaveEdit}
+            onCancel={() => setIsAddingTag(false)}
           />
         </DialogContent>
       </Dialog>

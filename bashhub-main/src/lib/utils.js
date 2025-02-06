@@ -4,10 +4,15 @@ import { twMerge } from "tailwind-merge";
 
 // Time constants for sessions
 export const SESSION_TIMES = {
-  DWS1_LOCK: '13:30',  // 1:30 PM
-  DWS2_LOCK: '16:00',    // 4:00 PM
-  DWS3_LOCK: '18:00',    // 6:00 PM
-  ALL_UNLOCK: '23:00',   // 11:00 PM
+  // DWS1_LOCK: '13:30',  // 1:30 PM
+  // DWS2_LOCK: '16:00',    // 4:00 PM
+  // DWS3_LOCK: '18:00',    // 6:00 PM
+  // ALL_UNLOCK: '23:00',   // 11:00 PM
+
+  DWS1_LOCK: '20:00',  // 1:30 PM
+  DWS2_LOCK: '20:30',    // 4:00 PM
+  DWS3_LOCK: '21:00',    // 6:00 PM
+  ALL_UNLOCK: '21:30',   // 11:00 PM
   
 };
 
