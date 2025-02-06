@@ -1,31 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Calendar as CalendarIcon } from "lucide-react";
 function TaskForm({ task: initialTask, onSubmit, onCancel }) {
   console.log(initialTask);
   const [task, setTask] = useState({
-    task_name: initialTask?.task_name || '',
-    // task_description: initialTask?.task_description || '',
+    task_name: initialTask?.task_name || "",
+    task_desc: initialTask?.task_desc || "",
     // task_level: initialTask?.task_level || '', // No default value for urgency
   });
 
-  const [errors, setErrors] = useState({}); // State to track validation errors
+  const [errors, setErrors] = useState({});
 
   // Update the form state if the `task` prop changes
+  // useEffect(() => {
+  //   if (initialTask) {
+  //     setTask({
+  //       task_name: initialTask.task_name || "",
+  //       task_desc: initialTask?.task_desc || "",
+  //       date: initialTask.date
+  //         ? new Date(initialTask.date + "T00:00:00Z")
+  //             .toISOString()
+  //             .split("T")[0]
+  //         : "",
+  //     });
+  //   }
+  // }, [initialTask]);
+
+
   useEffect(() => {
     if (initialTask) {
       setTask({
-        task_name: initialTask.task_name || '',
-        // task_description: initialTask.task_description || '',
-        // task_level: initialTask.task_level || '',
+        task_name: initialTask.task_name || "",
+        task_desc: initialTask?.task_desc || "",
+        date: initialTask.date
+          ? new Date(initialTask.date + "T00:00:00Z")
+              .toISOString()
+              .split("T")[0]
+          : "",
       });
     }
   }, [initialTask]);
@@ -37,7 +62,7 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
     // Validate required fields
     const validationErrors = {};
     if (!task.task_name.trim()) {
-      validationErrors.task_name = 'Task title is required.';
+      validationErrors.task_name = "Task title is required.";
     }
     // if (!task.task_level) {
     //   validationErrors.task_level = 'Urgency level is required.';
@@ -49,13 +74,27 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
       return;
     }
 
-    // Include the task_id if editing an existing task
     const updatedTask = initialTask
-      ? { ...initialTask, task_id: initialTask.task_id, task_name: task.task_name }
-      : task;
+      ? {
+          ...initialTask,
+          task_id: initialTask.task_id,
+          task_name: task.task_name,
+          task_desc: task.task_desc,
+          date:
+            task.date && task.date.trim() !== ""
+              ? task.date
+              : new Date().toISOString().split("T")[0], // Set to current date if empty
+        }
+      : {
+          ...task,
+          date:
+            task.date && task.date.trim() !== ""
+              ? task.date
+              : new Date().toISOString().split("T")[0], // Set to current date if empty
+        };
 
-    onSubmit(updatedTask); 
-    onCancel(); 
+    onSubmit(updatedTask);
+    onCancel();
   };
 
   return (
@@ -68,7 +107,7 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
             value={task.task_name}
             onChange={(e) => {
               setTask({ ...task, task_name: e.target.value });
-              setErrors((prevErrors) => ({ ...prevErrors, task_name: '' })); // Clear error on input
+              setErrors((prevErrors) => ({ ...prevErrors, task_name: "" })); // Clear error on input
             }}
             required
           />
@@ -76,42 +115,51 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
             <p className="text-red-500 text-sm mt-1">{errors.task_name}</p>
           )}
         </div>
-
-        {/* Urgency */}
-        {/* <div className="flex-2">
-          <Select
-            value={task.task_level}
-            onValueChange={(value) => {
-              setTask({ ...task, task_level: value });
-              setErrors((prevErrors) => ({ ...prevErrors, task_level: '' })); // Clear error on selection
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select Urgency" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Low">Low Urgency</SelectItem>
-              <SelectItem value="Medium">Medium Urgency</SelectItem>
-              <SelectItem value="High">High Urgency</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.task_level && (
-            <p className="text-red-500 text-sm mt-1">{errors.task_level}</p>
-          )}
-        </div> */}
       </div>
 
       <div className="flex gap-4">
         {/* Task Description */}
-        {/* <div className="flex-1">
+        <div className="flex-1">
           <Input
             placeholder="Add description..."
-            value={task.task_description}
-            onChange={(e) =>
-              setTask({ ...task, task_description: e.target.value })
-            }
+            value={task.task_desc}
+            onChange={(e) => setTask({ ...task, task_desc: e.target.value })}
           />
-        </div> */}
+        </div>
+      </div>
+      <div className="w-full">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-left font-normal"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {task.date ? (
+                new Date(task.date).toLocaleDateString()
+              ) : (
+                <span>date</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={task.deadline}
+              onSelect={(date) => {
+                if (date) {
+                  const localDate = new Date(
+                    date.getTime() - date.getTimezoneOffset() * 60000
+                  )
+                    .toISOString()
+                    .split("T")[0];
+                  setTask({ ...task, date: localDate });
+                }
+              }}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Form Actions */}
@@ -120,7 +168,7 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
           Cancel
         </Button>
         <Button type="submit">
-          {initialTask ? 'Save Changes' : 'Add Task'}
+          {initialTask ? "Save Changes" : "Add Task"}
         </Button>
       </div>
     </form>

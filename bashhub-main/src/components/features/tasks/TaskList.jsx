@@ -1,42 +1,62 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreVertical, Pencil, FolderInput, Trash, Eye } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { MoreVertical, Pencil, FolderInput, Trash, Eye } from "lucide-react";
 
 function TaskList({ tasks, onEdit, onView, onMove, onDelete }) {
+  if (!tasks.length) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        No tasks available
+      </div>
+    );
+  }
   return (
     <div className="space-y-4">
       {tasks.map((task) => (
         <div
           key={task.task_id}
           className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm ${
-            task.is_complete ? 'bg-gray-50' : ''
+            task.is_complete ? "bg-gray-50" : ""
           }`}
         >
           <div className="flex justify-between items-start items-center">
             <div className="flex-1">
-              <h3 className={`font-medium ${
-                task.is_complete ? 'line-through text-gray-500' : ''
-              }`}>
+              <h3
+                className={`font-medium ${
+                  task.is_complete ? "line-through text-gray-500" : ""
+                }`}
+              >
                 {task.task_name}
               </h3>
-              {/* <p className={`text-sm text-gray-600 mt-1 ${
-                task.is_complete ? 'line-through' : ''
-              }`}>
-                {task.task_description}
+              <div className="text-sm text-gray-500 line-clamp-2 overflow-hidden text-ellipsis">
+                {task.task_desc}
+              </div>
+              {/* <p className={`text-sm text-gray-600 mt-1`}>
+                {task.task_desc}
               </p> */}
               <div className="flex items-center space-x-4 text-sm">
                 {/* <span className={getPriorityBadgeClass(task.task_level)}>
                   {task.task_level}
                 </span> */}
-                <span className="text-gray-500">
-                  {new Date(task.task_time).toLocaleDateString()}
+                <span className="text-sm text-gray-500 mt-1">
+                  {task.date
+                    ? new Date(task.date + "T00:00:00Z").toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }
+                      )
+                    : "No Date"}
                 </span>
+
                 {task.is_in_progress && (
                   <span className="text-blue-600">In Progress</span>
                 )}

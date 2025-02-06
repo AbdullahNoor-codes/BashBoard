@@ -4,11 +4,13 @@ import SessionCard from '../components/features/objectives/SessionCard';
 import SessionTasksList from '../components/features/objectives/SessionTasksList';
 // import TaskForm from '../components/features/objectives/TaskForm';
 import TaskForm from '../components/features/tasks/TaskForm';
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DndProvider } from 'react-dnd';
@@ -17,6 +19,11 @@ import { useTaskAutoMove } from '@/hooks/useTaskAutoMove';
 import { isTaskFromToday, isSameDay } from '@/lib/utils';
 import { useSessionLock } from '@/hooks/useSessionLock';
 import { toast } from 'sonner';
+
+//  https://server-bashboard.vercel.app/,
+//  http://localhost:3000/
+
+
 
 function Objectives() {
   const [activeTab, setActiveTab] = useState('current-tasks');
@@ -53,10 +60,9 @@ function Objectives() {
     let loadingToastId;
     try {
       loadingToastId = toast.loading('Loading Tasks');
-      const response = await axios.get(`https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`);
-      // const response = await axios.get(
-      //   `http://localhost:3000/apis/tasks?userId=${userId}`
-      // );
+      const response = await axios.get(
+        `https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`
+      );
       const responseData = Array.isArray(response.data) ? response.data : [];
       console.log(responseData);
       toast.dismiss(loadingToastId);
@@ -68,13 +74,11 @@ function Objectives() {
     }
   };
 
-
   const handleAddTask = async (newTask) => {
     let loadingToastId;
     let taskData;
     try {
       loadingToastId = toast.loading('Creating Task');
-      const now = new Date().toISOString();
   
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) throw new Error("User not found in local storage");
@@ -82,7 +86,8 @@ function Objectives() {
       taskData = {
         task_id: crypto.randomUUID(),
         task_name: newTask.task_name,
-        task_time: now,
+        task_desc: newTask.task_desc,
+        date: newTask.date,
         coming_from: selectedSessionId,
         moved_to: '',
         is_in_progress: false,
@@ -92,8 +97,8 @@ function Objectives() {
   
       setTasks((prevTasks) => [taskData, ...prevTasks]);
 
-      await axios.post(`https://server-bashboard.vercel.app/apis/tasks`, taskData);
-      // await axios.post("http://localhost:3000/apis/tasks", taskData);
+      // await axios.post(`https://server-bashboard.vercel.app/apis/tasks`, taskData);
+      await axios.post("https://server-bashboard.vercel.app/apis/tasks", taskData);
       setIsAddingTask(false);
       toast.dismiss(loadingToastId);
       toast.success("Task Create Successfully!")
@@ -119,8 +124,8 @@ function Objectives() {
       );
       setTasks(newTasks);
       
+      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
       await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
       toast.success("Task Completed Successfully");      
     } catch (error) {
       toast.error("Please Try Again Task is Not completed");
@@ -142,7 +147,6 @@ function Objectives() {
       setTasks(newTasks);
      
       await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
     } catch (error) {
       toast.error("Please Try Again Task is Not Updated Correctly");
       setTasks(prevTasks=> prevTasks.map(t=> t.task_id === task.task_id? task: t));
@@ -151,16 +155,18 @@ function Objectives() {
   };
 
   const handleEditTask = (task) => {
-    setTaskToEdit(task); 
+    console.log(task);
+    setTaskToEdit(task);  
     setIsEditingTask(true);
   };
 
   const handleSaveEdit = async (updatedTaskData) => {
+    console.log(updatedTaskData);
     let loadingToastId;
-    const oldTask = tasks.find(t=> t.task_id === updatedTask.task_id);
+    const oldTask = tasks.find(t=> t.task_id === updatedTaskData.task_id);
     setTasks((prevTasks) =>
       prevTasks.map((t) =>
-        t.task_id === updatedTask.task_id ? { ...updatedTaskData } : t
+        t.task_id === updatedTaskData.task_id ? { ...updatedTaskData } : t
       )
     );
   
@@ -170,8 +176,7 @@ function Objectives() {
       if (!user) throw new Error("User not found in local storage");
 
       await axios.put(
-        `https://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`,
-        // `http://localhost:3000/apis/tasks/${updatedTaskData.task_id}`,
+        `https://server-bashboard.vercel.app/apis/tasks/${updatedTaskData.task_id}`,
         updatedTaskData
       );
       setIsEditingTask(false); // Close the edit dialog
@@ -199,10 +204,9 @@ function Objectives() {
       loadingToastId = toast.loading('Deleting Task');
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) throw new Error("User not found in local storage");
-      await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
-      // await axios.delete(
-      //   `http://localhost:3000/apis/tasks/${task.task_id}`
-      // );
+      await axios.delete(
+        `https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`
+      );
       toast.dismiss(loadingToastId);
       toast.success("Task Deleted Successfully!")
     } catch (error) {
@@ -242,7 +246,6 @@ function Objectives() {
       if (!user) throw new Error('User not found in local storage');
       
       await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${taskId}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${taskId}`, updatedTask);
   
       toast.success("Task moved successfully");
     } catch (error) {
@@ -265,9 +268,7 @@ function Objectives() {
       };
       const newTasks = tasks.map(t => t.task_id === task.task_id? updatedTask: t)
       setTasks(newTasks);
-
       await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
       toast.success("Task Completed Successfully");      
     } catch (error) {
       toast.error("Please Try Again Task is Not completed");
@@ -283,29 +284,6 @@ function Objectives() {
       )
     );
   };
-
-//   useTaskAutoMove(tasks, async () => {
-//   try {
-//     const user = JSON.parse(localStorage.getItem('user'));
-//     if (!user) throw new Error('User not found in local storage');
-//     await fetchTasks(user.user_id);
-//   } catch (error) {
-//     console.error('Error moving task:', error);
-//   }
-// });
-
-  // Modify the task filtering to only show today's tasks
-  // const filterTodaysTasks = (sessionId) => {
-  //   console.log("Enterd filterTodaysTasks");
-  //   console.log(tasks);
-    
-  //   const today = new Date();
-  //   return tasks.filter(task => {
-  //     const taskDate = new Date(task.task_time);
-  //     return task.coming_from === sessionId && 
-  //            isSameDay(taskDate, today);
-  //   });
-  // };
 
   const filterTodaysTasks = (sessionId) => {
     console.log("Entered filterTodaysTasks");
@@ -415,20 +393,22 @@ function Objectives() {
         </Dialog>
 
         {/* Edit Task Dialog */}
+        
         <Dialog open={isEditingTask} onOpenChange={setIsEditingTask}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Edit Task</DialogTitle>
-            </DialogHeader>
-            {taskToEdit && (
-              <TaskForm
-                initialData={taskToEdit} // Pass the full task object, including task_id
-                onSubmit={handleSaveEdit}
-                onCancel={() => setIsEditingTask(false)}
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Task</DialogTitle>
+            <DialogDescription>
+              Update the details of the selected task.
+            </DialogDescription>
+          </DialogHeader>
+          <TaskForm
+            task={taskToEdit}
+            onSubmit={handleSaveEdit}
+            onCancel={() => setIsEditingTask(false)}
+          />
+        </DialogContent>
+      </Dialog>
 
         {/* View Task Dialog */}
         <Dialog open={isViewingTask} onOpenChange={setIsViewingTask}>
@@ -439,10 +419,22 @@ function Objectives() {
             {taskToView && (
               <div>
                 <p><strong>Name:</strong> {taskToView.task_name}</p>
-                {/* <p><strong>Description:</strong> {taskToView.task_description}</p>
-                <p><strong>Level:</strong> {taskToView.task_level}</p> */}
-                <p><strong>Created At:</strong> {new Date(taskToView.task_time).toLocaleString()}</p>
+                <p><strong>Description:</strong> {taskToView.task_desc}</p>
                 <p><strong>Status:</strong> {taskToView.is_complete ? 'Completed' : 'Not Completed'}</p>
+                {/* <p><strong>Level:</strong> {taskToView.task_level}</p>  */}
+                <p className="mb-4">
+                <strong>Created At:</strong>{" "}
+                {taskToView.date
+                    ? new Date(taskToView.date + "T00:00:00Z").toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        }
+                      )
+                    : "No Date"}
+              </p>
                 <button
                   className="px-3 py-1 bg-black text-white rounded-md mt-4 hover:bg-gray-800 transition-colors"
                   onClick={() => setIsViewingTask(false)}

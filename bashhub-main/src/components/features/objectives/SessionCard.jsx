@@ -48,7 +48,6 @@ function SessionCard({ id, title, tasks, className, onAddTask, onTaskMove, handl
       };
   
       await axios.post('https://server-bashboard.vercel.app/apis/tasks/bulk-update', requestBody);
-      // await axios.post('http://localhost:3000/apis/tasks/bulk-update', requestBody);
   
       console.log("Tasks moved to current-tasks successfully");
       

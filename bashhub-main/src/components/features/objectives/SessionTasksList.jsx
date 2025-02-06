@@ -52,7 +52,7 @@ function SessionTasksList({
         <div className="flex items-center space-x-4">
           {showCompleteButton && (
             <button
-              className={`w-5 h-5 rounded-full border-2 ${
+              className={`w-5 h-5 rounded-full border-2 flex-shrink-0 ${
                 task.is_complete ? 'border-green-500 bg-green-500' : 'border-gray-300'
               }`}
               onClick={() => handleAction(task.is_complete ? onMarkUncomplete : onMarkComplete, task)}
@@ -63,7 +63,18 @@ function SessionTasksList({
 
           <div>
             <p className="font-semibold line-clamp-1">{task.task_name}</p>
-            <p className="text-sm text-gray-500">{new Date(task.task_time).toLocaleDateString()}</p>
+            <div className="text-sm text-gray-500 line-clamp-2 overflow-hidden text-ellipsis">
+                {task.task_desc}
+              </div> 
+            <span className="text-gray-500">
+                  {task.date
+                    ? new Date(task.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })
+                    : "No Date"}
+                </span>
             {/* <p className={`text-xs font-medium ${getPriorityColor(task.task_level)}`}>
               Priority: {task.task_level}
             </p> */}
