@@ -21,8 +21,8 @@ import { useSessionLock } from '@/hooks/useSessionLock';
 import { toast } from 'sonner';
 import TagsForm from '@/components/features/tasks/TagsForm';
 
-//  https://server-bashboard.vercel.app/,
-//  https://server-bashboard.vercel.app/
+//  http://localhost:3000/,
+//  http://localhost:3000/
 
 
 
@@ -34,10 +34,12 @@ function Objectives() {
   const [IsAddingTag, setIsAddingTag] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [tags, setTags] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [taskToAddTags, setTaskTags] = useState(null);
   const [taskToView, setTaskToView] = useState(null);
   const lockStatus = useSessionLock();
+
 
   const sessions = [
     { id: 'current-tasks', title: 'Current Task' },
@@ -64,12 +66,14 @@ function Objectives() {
     try {
       loadingToastId = toast.loading('Loading Tasks');
       const response = await axios.get(
-        `https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`
+        `http://localhost:3000/apis/tasks?userId=${userId}`
       );
       const responseData = Array.isArray(response.data) ? response.data : [];
       console.log(responseData);
       toast.dismiss(loadingToastId);
       setTasks(responseData); // Ensure tasks is always an array
+      const uniqueTags = [...new Set(responseData.flatMap(task => task.task_tags).filter(tag => tag))];
+setTags(uniqueTags);
     } catch (error) {
       toast.dismiss(loadingToastId);
       toast.error("Sorry, try again. Could not load tasks.");
@@ -101,8 +105,8 @@ function Objectives() {
   
       setTasks((prevTasks) => [taskData, ...prevTasks]);
 
-      // await axios.post(`https://server-bashboard.vercel.app/apis/tasks`, taskData);
-      await axios.post("https://server-bashboard.vercel.app/apis/tasks", taskData);
+      // await axios.post(`http://localhost:3000/apis/tasks`, taskData);
+      await axios.post("http://localhost:3000/apis/tasks", taskData);
       setIsAddingTask(false);
       toast.dismiss(loadingToastId);
       toast.success("Task Create Successfully!")
@@ -128,8 +132,8 @@ function Objectives() {
       );
       setTasks(newTasks);
       
-      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
+      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
       toast.success("Task Completed Successfully");      
     } catch (error) {
       toast.error("Please Try Again Task is Not completed");
@@ -150,7 +154,7 @@ function Objectives() {
       const newTasks = tasks.map(t => t.task_id === task.task_id? updatedTask: t)
       setTasks(newTasks);
      
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
     } catch (error) {
       toast.error("Please Try Again Task is Not Updated Correctly");
       setTasks(prevTasks=> prevTasks.map(t=> t.task_id === task.task_id? task: t));
@@ -180,7 +184,7 @@ function Objectives() {
       if (!user) throw new Error("User not found in local storage");
 
       await axios.put(
-        `https://server-bashboard.vercel.app/apis/tasks/${updatedTaskData.task_id}`,
+        `http://localhost:3000/apis/tasks/${updatedTaskData.task_id}`,
         updatedTaskData
       );
       setIsEditingTask(false); // Close the edit dialog
@@ -215,7 +219,7 @@ function Objectives() {
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) throw new Error("User not found in local storage");
       await axios.delete(
-        `https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`
+        `http://localhost:3000/apis/tasks/${task.task_id}`
       );
       toast.dismiss(loadingToastId);
       toast.success("Task Deleted Successfully!")
@@ -254,7 +258,7 @@ function Objectives() {
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user) throw new Error('User not found in local storage');
       
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${taskId}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${taskId}`, updatedTask);
   
       toast.success("Task moved successfully");
     } catch (error) {
@@ -277,7 +281,7 @@ function Objectives() {
       };
       const newTasks = tasks.map(t => t.task_id === task.task_id? updatedTask: t)
       setTasks(newTasks);
-      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
       toast.success("Task Completed Successfully");      
     } catch (error) {
       toast.error("Please Try Again Task is Not completed");
@@ -431,6 +435,7 @@ function Objectives() {
             </DialogDescription>
           </DialogHeader>
           <TagsForm
+          optionTags={tags}
             task={taskToAddTags}
             onSubmit={handleSaveEdit}
             onCancel={() => setIsAddingTag(false)}

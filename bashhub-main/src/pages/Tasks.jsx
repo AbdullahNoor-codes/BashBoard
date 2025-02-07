@@ -32,8 +32,14 @@ function Tasks() {
   const [activeTab, setActiveTab] = useState("today");
 
 
-  // https://server-bashboard.vercel.app/
-  // https://server-bashboard.vercel.app/
+  // http://localhost:3000/
+  // http://localhost:3000/
+
+
+
+
+
+
 
   useEffect(() => {
     try {
@@ -49,9 +55,9 @@ function Tasks() {
     let loadingToastId;
     try {
       loadingToastId = toast.loading("Loading Tasks");
-      // const response = await axios.get(`https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`);
+      // const response = await axios.get(`http://localhost:3000/apis/tasks?userId=${userId}`);
       const response = await axios.get(
-        `https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`
+        `http://localhost:3000/apis/tasks?userId=${userId}`
       );
       // console.log(response.data);
       toast.dismiss(loadingToastId);
@@ -87,7 +93,7 @@ function Tasks() {
 
         setTasks((prevTasks) => [taskData, ...prevTasks]);
 
-        await axios.post("https://server-bashboard.vercel.app/apis/tasks", taskData);
+        await axios.post("http://localhost:3000/apis/tasks", taskData);
         setIsAddingTask(false);
         toast.dismiss(loadingToastId);
         toast.success("Task Create Successfully!");
@@ -127,7 +133,7 @@ function Tasks() {
       if (!user) throw new Error("User not found in local storage");
 
       await axios.put(
-        `https://server-bashboard.vercel.app/apis/tasks/${updatedTask.task_id}`,
+        `http://localhost:3000/apis/tasks/${updatedTask.task_id}`,
         updatedTask
       );
       setIsEditingTask(false); // Close the edit dialog
@@ -155,7 +161,7 @@ function Tasks() {
       loadingToastId = toast.loading("Deleting Task");
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) throw new Error("User not found in local storage");
-      await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
+      await axios.delete(`http://localhost:3000/apis/tasks/${task.task_id}`);
       toast.dismiss(loadingToastId);
       toast.success("Task Deleted Successfully!");
     } catch (error) {
@@ -194,7 +200,7 @@ function Tasks() {
       };
       setIsMovingTask(false);
       await axios.put(
-        `https://server-bashboard.vercel.app/apis/tasks/${taskToMove.task_id}`,
+        `http://localhost:3000/apis/tasks/${taskToMove.task_id}`,
         updatedTask
       );
       toast.dismiss(loadingToastId);
