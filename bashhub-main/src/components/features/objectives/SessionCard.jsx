@@ -38,7 +38,7 @@ function SessionCard({ id, title, tasks, className, onAddTask, onTaskMove, handl
   const MoveTasksToCurrentTasks = async (listOfTaskIds) => {
     const updates= {
       coming_from: "current-tasks", // Update the 'coming_from' field
-      is_in_progress: false,       // Optionally update other fields
+      // is_in_progress: false,       // Optionally update other fields
     }
     const task_ids = listOfTaskIds;
     try {

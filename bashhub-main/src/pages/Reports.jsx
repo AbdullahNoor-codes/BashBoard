@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import ReportCard from '../components/features/reports/ReportCards';
 import { isSameDay } from '@/lib/utils';
-import sendReportToSlack from '../services/slackService';
+import { useSessionLock } from '@/hooks/useSessionLock';
 import { toast } from 'sonner';
 
 function Reports() {
-  const [tasks, setTasks] = useState([]);
   const [reportData, setReportData] = useState(null);
-  const [userEmail, setUserEmail] = useState('');
+  const lockStatus = useSessionLock();
 
   useEffect(() => {
     try {
@@ -31,8 +30,7 @@ function Reports() {
       const responseData = Array.isArray(response.data) ? response.data : [];
       console.log(responseData);
       toast.dismiss(loadingToastId);
-      setTasks(responseData); // Ensure tasks is always an array
-      generateReport(responseData); // Generate the report after fetching tasks
+      generateReport(responseData); 
     } catch (error) {
       toast.dismiss(loadingToastId);
       toast.error("Sorry, try again. Could not load tasks.");
@@ -40,35 +38,27 @@ function Reports() {
     }
   };
 
-  
   const generateReport = (tasks) => {
     const today = new Date();
     let reportDate = null;
     let reportTasks = null;
-  
-    console.log("All fetched tasks:", tasks); // Log all tasks
-  
-    for (let i = 7; i >= 0; i--) {
-      const checkDate = new Date(today);
-      checkDate.setDate(today.getDate() - i);
-  
+
+    console.log("All fetched tasks:", tasks);
       const tasksForDate = tasks.filter(task =>
-        isSameDay(new Date(task.date), checkDate)
+        isSameDay(new Date(task.date), today)
       );
-  
-      console.log(`Tasks for ${checkDate.toISOString().split('T')[0]}:`, tasksForDate); // Log tasks for each date
-  
+
+
       if (tasksForDate.length > 0 && !reportDate) {
-        reportDate = checkDate;
+        reportDate = today;
         reportTasks = tasksForDate;
       }
-    }
-  
+
     if (!reportDate || !reportTasks) {
-      console.warn("No matching tasks found for the past 7 days.");
+      console.warn("No Tasks Today");
       return;
     }
-  
+
     // Organize tasks by section
     const organizedTasks = {
       'current-tasks': [],
@@ -77,7 +67,7 @@ function Reports() {
       'dws3': { completed: [], inProgress: [] },
       'rws': { completed: [], inProgress: [] }
     };
-  
+
     reportTasks.forEach(task => {
       const section = task.coming_from;
       const taskDetails = {
@@ -89,7 +79,7 @@ function Reports() {
         is_in_progress: task.is_in_progress,
         is_complete: task.is_complete
       };
-  
+
       if (section === 'current-tasks') {
         if (task.is_in_progress) {
           organizedTasks['current-tasks'].push(taskDetails);
@@ -97,35 +87,39 @@ function Reports() {
       } else if (section) {
         if (task.is_complete) {
           organizedTasks[section].completed.push(taskDetails);
-        } else if (task.is_in_progress) {
-          organizedTasks[section].inProgress.push(taskDetails);
-        }
+        } 
       }
     });
-  
-    console.log("Organized tasks:", organizedTasks); // Log organized tasks
-  
+
+    const filteredSections = {};
+
+    ['dws1', 'dws2', 'dws3'].forEach(section => {
+      if (lockStatus[section]) {
+        filteredSections[section] = organizedTasks[section].completed;
+      }
+    });
+    if(['dws1', 'dws2', 'dws3'].every(session=> lockStatus[session] )){
+      filteredSections['rws'] = organizedTasks['rws'].completed;
+        filteredSections['current-tasks'] = organizedTasks['current-tasks'];
+    }
+
+    // If all sessions are blocked except rws, create blocks of all sessions
+    // if (allBlocked && !lockStatus['rws']) {
+    //   ['dws1', 'dws2', 'dws3', 'rws'].forEach(section => {
+    //     filteredSections[section] = organizedTasks[section].completed;
+    //   });
+    // }
+
+    // Add current-tasks session if all sessions are blocked
+    // if (allBlocked) {
+    //   filteredSections['current-tasks'] = organizedTasks['current-tasks'];
+    // }
+
+    console.log("Filtered sections:", filteredSections);
+
     setReportData({
       date: reportDate.toLocaleDateString('en-GB'),
-      sections: {
-        'current-tasks': organizedTasks['current-tasks'],
-        'dws1': [
-          ...organizedTasks.dws1.completed,
-          ...organizedTasks.dws1.inProgress
-        ],
-        'dws2': [
-          ...organizedTasks.dws2.completed,
-          ...organizedTasks.dws2.inProgress
-        ],
-        'dws3': [
-          ...organizedTasks.dws3.completed,
-          ...organizedTasks.dws3.inProgress
-        ],
-        'rws': [
-          ...organizedTasks.rws.completed,
-          ...organizedTasks.rws.inProgress
-        ]
-      }
+      sections: filteredSections
     });
   };
 
@@ -136,9 +130,6 @@ function Reports() {
         {reportData ? (
           <>
             <ReportCard data={reportData} />
-            <div className="text-sm text-gray-500 mt-2">
-              Report generated by: {userEmail}
-            </div>
           </>
         ) : (
           <p className="text-gray-500 italic">No tasks available for the report.</p>

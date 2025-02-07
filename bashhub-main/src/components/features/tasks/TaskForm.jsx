@@ -8,34 +8,38 @@
 // } from "@/components/ui/popover";
 // import { Calendar } from "@/components/ui/calendar";
 // import { Calendar as CalendarIcon } from "lucide-react";
+
 // function TaskForm({ task: initialTask, onSubmit, onCancel }) {
 //   console.log(initialTask);
+
+//   // Initialize state with task_tags included
 //   const [task, setTask] = useState({
 //     task_name: initialTask?.task_name || "",
 //     task_desc: initialTask?.task_desc || "",
-//     // task_level: initialTask?.task_level || '', // No default value for urgency
+//     date: initialTask?.date
+//       ? new Date(initialTask.date + "T00:00:00Z").toISOString().split("T")[0]
+//       : "",
+//     task_tags: initialTask?.task_tags || [], // Include task_tags in the initial state
 //   });
 
 //   const [errors, setErrors] = useState({});
 
-
+//   // Update state when initialTask changes
 //   useEffect(() => {
 //     if (initialTask) {
 //       setTask({
 //         task_name: initialTask.task_name || "",
 //         task_desc: initialTask?.task_desc || "",
 //         date: initialTask.date
-//           ? new Date(initialTask.date + "T00:00:00Z")
-//               .toISOString()
-//               .split("T")[0]
+//           ? new Date(initialTask.date + "T00:00:00Z").toISOString().split("T")[0]
 //           : "",
+//         task_tags: initialTask?.task_tags || [], // Preserve task_tags
 //       });
 //     }
 //   }, [initialTask]);
 
 //   const handleSubmit = (e) => {
 //     e.preventDefault();
-
 //     const validationErrors = {};
 //     if (!task.task_name.trim()) {
 //       validationErrors.task_name = "Task title is required.";
@@ -45,6 +49,7 @@
 //       return;
 //     }
 
+//     // Create the updated task object
 //     const updatedTask = initialTask
 //       ? {
 //           ...initialTask,
@@ -55,6 +60,7 @@
 //             task.date && task.date.trim() !== ""
 //               ? task.date
 //               : new Date().toISOString().split("T")[0], // Set to current date if empty
+//           task_tags: task.task_tags, // Include task_tags in the updated task
 //         }
 //       : {
 //           ...task,
@@ -70,15 +76,18 @@
 
 //   return (
 //     <form onSubmit={handleSubmit} className="space-y-4">
+//       {/* Task Title */}
 //       <div className="flex gap-4">
 //         <div className="flex-1">
 //           <Input
 //             placeholder="Add a new task..."
 //             value={task.task_name}
-//             onChange={(e) => {
-//               setTask({ ...task, task_name: e.target.value });
-//               setErrors((prevErrors) => ({ ...prevErrors, task_name: "" }));
-//             }}
+//             onChange={(e) =>
+//               setTask((prevTask) => ({
+//                 ...prevTask,
+//                 task_name: e.target.value,
+//               }))
+//             }
 //             required
 //           />
 //           {errors.task_name && (
@@ -87,16 +96,23 @@
 //         </div>
 //       </div>
 
+//       {/* Task Description */}
 //       <div className="flex gap-4">
-//         {/* Task Description */}
 //         <div className="flex-1">
 //           <Input
 //             placeholder="Add description..."
 //             value={task.task_desc}
-//             onChange={(e) => setTask({ ...task, task_desc: e.target.value })}
+//             onChange={(e) =>
+//               setTask((prevTask) => ({
+//                 ...prevTask,
+//                 task_desc: e.target.value,
+//               }))
+//             }
 //           />
 //         </div>
 //       </div>
+
+//       {/* Task Date */}
 //       <div className="w-full">
 //         <Popover>
 //           <PopoverTrigger asChild>
@@ -115,7 +131,7 @@
 //           <PopoverContent className="w-auto p-0">
 //             <Calendar
 //               mode="single"
-//               selected={task.deadline}
+//               selected={task.date ? new Date(task.date) : null}
 //               onSelect={(date) => {
 //                 if (date) {
 //                   const localDate = new Date(
@@ -123,7 +139,10 @@
 //                   )
 //                     .toISOString()
 //                     .split("T")[0];
-//                   setTask({ ...task, date: localDate });
+//                   setTask((prevTask) => ({
+//                     ...prevTask,
+//                     date: localDate,
+//                   }));
 //                 }
 //               }}
 //               initialFocus
@@ -150,6 +169,7 @@
 
 
 
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -170,11 +190,20 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
     task_desc: initialTask?.task_desc || "",
     date: initialTask?.date
       ? new Date(initialTask.date + "T00:00:00Z").toISOString().split("T")[0]
-      : "",
+      : getCurrentLocalDate(), // Use local date by default
     task_tags: initialTask?.task_tags || [], // Include task_tags in the initial state
   });
 
   const [errors, setErrors] = useState({});
+
+  // Helper function to get the current date in the local timezone
+  function getCurrentLocalDate() {
+    const now = new Date();
+    const localDate = new Date(
+      now.getTime() - now.getTimezoneOffset() * 60000
+    ).toISOString();
+    return localDate.split("T")[0];
+  }
 
   // Update state when initialTask changes
   useEffect(() => {
@@ -184,7 +213,7 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
         task_desc: initialTask?.task_desc || "",
         date: initialTask.date
           ? new Date(initialTask.date + "T00:00:00Z").toISOString().split("T")[0]
-          : "",
+          : getCurrentLocalDate(), // Use local date by default
         task_tags: initialTask?.task_tags || [], // Preserve task_tags
       });
     }
@@ -211,7 +240,7 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
           date:
             task.date && task.date.trim() !== ""
               ? task.date
-              : new Date().toISOString().split("T")[0], // Set to current date if empty
+              : getCurrentLocalDate(), // Set to current local date if empty
           task_tags: task.task_tags, // Include task_tags in the updated task
         }
       : {
@@ -219,7 +248,7 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
           date:
             task.date && task.date.trim() !== ""
               ? task.date
-              : new Date().toISOString().split("T")[0], // Set to current date if empty
+              : getCurrentLocalDate(), // Set to current local date if empty
         };
 
     onSubmit(updatedTask);
