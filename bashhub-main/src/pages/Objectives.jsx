@@ -21,8 +21,8 @@ import { useSessionLock } from '@/hooks/useSessionLock';
 import { toast } from 'sonner';
 import TagsForm from '@/components/features/tasks/TagsForm';
 
-//  http://localhost:3000/,
-//  http://localhost:3000/
+//  https://server-bashboard.vercel.app/,
+//  https://server-bashboard.vercel.app/
 
 
 
@@ -66,7 +66,7 @@ function Objectives() {
     try {
       loadingToastId = toast.loading('Loading Tasks');
       const response = await axios.get(
-        `http://localhost:3000/apis/tasks?userId=${userId}`
+        `https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`
       );
       const responseData = Array.isArray(response.data) ? response.data : [];
       console.log(responseData);
@@ -105,8 +105,8 @@ setTags(uniqueTags);
   
       setTasks((prevTasks) => [taskData, ...prevTasks]);
 
-      // await axios.post(`http://localhost:3000/apis/tasks`, taskData);
-      await axios.post("http://localhost:3000/apis/tasks", taskData);
+      // await axios.post(`https://server-bashboard.vercel.app/apis/tasks`, taskData);
+      await axios.post("https://server-bashboard.vercel.app/apis/tasks", taskData);
       setIsAddingTask(false);
       toast.dismiss(loadingToastId);
       toast.success("Task Create Successfully!")
@@ -132,8 +132,8 @@ setTags(uniqueTags);
       );
       setTasks(newTasks);
       
-      // await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
-      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
       toast.success("Task Completed Successfully");      
     } catch (error) {
       toast.error("Please Try Again Task is Not completed");
@@ -154,7 +154,7 @@ setTags(uniqueTags);
       const newTasks = tasks.map(t => t.task_id === task.task_id? updatedTask: t)
       setTasks(newTasks);
      
-      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
     } catch (error) {
       toast.error("Please Try Again Task is Not Updated Correctly");
       setTasks(prevTasks=> prevTasks.map(t=> t.task_id === task.task_id? task: t));
@@ -184,7 +184,7 @@ setTags(uniqueTags);
       if (!user) throw new Error("User not found in local storage");
 
       await axios.put(
-        `http://localhost:3000/apis/tasks/${updatedTaskData.task_id}`,
+        `https://server-bashboard.vercel.app/apis/tasks/${updatedTaskData.task_id}`,
         updatedTaskData
       );
       setIsEditingTask(false); // Close the edit dialog
@@ -219,7 +219,7 @@ setTags(uniqueTags);
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) throw new Error("User not found in local storage");
       await axios.delete(
-        `http://localhost:3000/apis/tasks/${task.task_id}`
+        `https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`
       );
       toast.dismiss(loadingToastId);
       toast.success("Task Deleted Successfully!")
@@ -258,7 +258,7 @@ setTags(uniqueTags);
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user) throw new Error('User not found in local storage');
       
-      await axios.put(`http://localhost:3000/apis/tasks/${taskId}`, updatedTask);
+      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${taskId}`, updatedTask);
   
       toast.success("Task moved successfully");
     } catch (error) {
@@ -281,7 +281,7 @@ setTags(uniqueTags);
       };
       const newTasks = tasks.map(t => t.task_id === task.task_id? updatedTask: t)
       setTasks(newTasks);
-      await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+      await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
       toast.success("Task Completed Successfully");      
     } catch (error) {
       toast.error("Please Try Again Task is Not completed");
