@@ -24,6 +24,7 @@ function Tasks() {
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [isViewingTask, setIsViewingTask] = useState(false);
   const [taskToView, setTaskToView] = useState(null);
+  const [tags, setTags] = useState([]);
   const [isMovingTask, setIsMovingTask] = useState(false);
   const [taskToMove, setTaskToMove] = useState(null);
   const [taskToAddTags, setTaskTags] = useState(null);
@@ -31,15 +32,8 @@ function Tasks() {
   const lockStatus = useSessionLock();
   const [activeTab, setActiveTab] = useState("today");
 
-
   // https://server-bashboard.vercel.app/
   // https://server-bashboard.vercel.app/
-
-
-
-
-
-
 
   useEffect(() => {
     try {
@@ -60,8 +54,16 @@ function Tasks() {
         `https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`
       );
       // console.log(response.data);
+      const responseData = Array.isArray(response.data) ? response.data : [];
+      console.log(responseData);
       toast.dismiss(loadingToastId);
-      setTasks(response.data);
+      setTasks(responseData);
+      const uniqueTags = [
+        ...new Set(
+          responseData.flatMap((task) => task.task_tags).filter((tag) => tag)
+        ),
+      ];
+      setTags(uniqueTags);
     } catch (error) {
       toast.dismiss(loadingToastId);
       toast.error("Sorry Try again could not load tasks");
@@ -93,7 +95,10 @@ function Tasks() {
 
         setTasks((prevTasks) => [taskData, ...prevTasks]);
 
-        await axios.post("https://server-bashboard.vercel.app/apis/tasks", taskData);
+        await axios.post(
+          "https://server-bashboard.vercel.app/apis/tasks",
+          taskData
+        );
         setIsAddingTask(false);
         toast.dismiss(loadingToastId);
         toast.success("Task Create Successfully!");
@@ -114,12 +119,20 @@ function Tasks() {
 
   const handleAddTag = (task) => {
     console.log(task);
-    setTaskTags(task);  
+    setTaskTags(task);
     setIsAddingTag(true);
   };
 
   const handleSaveEdit = async (updatedTask) => {
     let loadingToastId;
+    const newTags = updatedTask.task_tags;
+    const uniqueTags = [
+      ...new Set(
+        [...tags,
+        ...newTags]
+      ),
+    ];
+    setTags(uniqueTags);
     const oldTask = tasks.find((t) => t.task_id === updatedTask.task_id); // Store the original task name
     setTasks((prevTasks) =>
       prevTasks.map((t) =>
@@ -161,7 +174,9 @@ function Tasks() {
       loadingToastId = toast.loading("Deleting Task");
       const user = JSON.parse(localStorage.getItem("user"));
       if (!user) throw new Error("User not found in local storage");
-      await axios.delete(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`);
+      await axios.delete(
+        `https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`
+      );
       toast.dismiss(loadingToastId);
       toast.success("Task Deleted Successfully!");
     } catch (error) {
@@ -217,29 +232,36 @@ function Tasks() {
   const separateTasks = (tasks) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-  
+
     return {
-      todayTasks: tasks.filter(
-        (task) => {
-          const taskDate = new Date(task.date + "T00:00:00Z");
-          return isSameDay(taskDate, today) && !task.is_complete && task.coming_from === "current-tasks";
-        }
-      ),
-      oldTasks: tasks.filter(
-        (task) => {
-          const taskDate = new Date(task.date + "T00:00:00Z");
-          return taskDate < today && !isSameDay(taskDate, today) && !task.is_complete && task.coming_from === "current-tasks";
-        }
-      ),
-      futureTasks: tasks.filter(
-        (task) => {
-          const taskDate = new Date(task.date + "T00:00:00Z");
-          return taskDate > today && !isSameDay(taskDate, today) && !task.is_complete && task.coming_from === "current-tasks";
-        }
-      ),
+      todayTasks: tasks.filter((task) => {
+        const taskDate = new Date(task.date + "T00:00:00Z");
+        return (
+          isSameDay(taskDate, today) &&
+          !task.is_complete &&
+          task.coming_from === "current-tasks"
+        );
+      }),
+      oldTasks: tasks.filter((task) => {
+        const taskDate = new Date(task.date + "T00:00:00Z");
+        return (
+          taskDate < today &&
+          !isSameDay(taskDate, today) &&
+          !task.is_complete &&
+          task.coming_from === "current-tasks"
+        );
+      }),
+      futureTasks: tasks.filter((task) => {
+        const taskDate = new Date(task.date + "T00:00:00Z");
+        return (
+          taskDate > today &&
+          !isSameDay(taskDate, today) &&
+          !task.is_complete &&
+          task.coming_from === "current-tasks"
+        );
+      }),
     };
   };
-  
 
   // Separate tasks before rendering
   const { todayTasks, oldTasks, futureTasks } = separateTasks(tasks);
@@ -281,7 +303,6 @@ function Tasks() {
         </TabsContent>
         <TabsContent value="today">
           <TaskList
-
             tasks={todayTasks}
             onEdit={handleEditTask}
             onAddTag={handleAddTag}
@@ -344,6 +365,7 @@ function Tasks() {
             </DialogDescription>
           </DialogHeader>
           <TagsForm
+            optionTags={tags}
             task={taskToAddTags}
             onSubmit={handleSaveEdit}
             onCancel={() => setIsAddingTag(false)}
