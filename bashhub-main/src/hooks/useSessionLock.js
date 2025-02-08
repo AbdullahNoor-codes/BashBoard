@@ -9,7 +9,12 @@ export function useSessionLock() {
   // Function to check and update lock status
   const checkLockStatus = () => {
     const newLockStatus = getSessionLockStatus();
-    setLockStatus(newLockStatus);
+    
+    // Compare previous and new lock status using deep equality
+    if (!deepEqual(lockStatus, newLockStatus)) {
+      console.log('Lock status changed:', newLockStatus); // Debugging log
+      setLockStatus(newLockStatus);
+    }
 
     // Check for upcoming locks and send notifications
     Object.entries(SESSION_TIMES).forEach(([session, time]) => {
@@ -17,6 +22,7 @@ export function useSessionLock() {
 
       if (isWithin5MinutesBefore(time) && !notifiedSessions.current.has(session)) {
         const sessionName = session.split('_')[0].toUpperCase(); // Extract session name
+        
         NotificationService.sendNotification(
           'Session Lock Warning',
           {
@@ -25,6 +31,7 @@ export function useSessionLock() {
             requireInteraction: true, // Notification persists until user interacts
           }
         );
+        
         notifiedSessions.current.add(session); // Mark session as notified
       }
     });
@@ -40,14 +47,19 @@ export function useSessionLock() {
     // Request permission and register service worker for notifications
     NotificationService.requestPermission();
     NotificationService.registerServiceWorker();
-
+    
     // Initial check and interval setup
     checkLockStatus(); // Perform an initial check
-    const interval = setInterval(checkLockStatus, 200); // Check every minute
-
+    const interval = setInterval(checkLockStatus, 10000); // Check every minute
+    
     // Cleanup interval on unmount
     return () => clearInterval(interval);
   }, []);
 
   return lockStatus;
+}
+
+// Helper function for deep equality comparison
+function deepEqual(obj1, obj2) {
+  return JSON.stringify(obj1) === JSON.stringify(obj2);
 }

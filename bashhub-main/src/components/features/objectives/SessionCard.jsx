@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo, useMemo } from 'react';
 import { useDrop } from 'react-dnd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useSessionLock } from '@/hooks/useSessionLock';
@@ -20,39 +20,33 @@ function SessionCard({ id, title, tasks, className, onAddTask, onTaskMove, handl
   console.log(activeTasks);
 
   const lockStatus = useSessionLock();
-  const isLocked = lockStatus[id];
+  const isLocked = useMemo(() => lockStatus[id], [lockStatus, id]);
+
   console.log("isLocked");
   console.log(isLocked);
 
-  // useEffect(() => {
-  //   // Check if the session is locked and there are tasks to move
-  //   if (lockStatus[id] && (inProgressTasks.length > 0 || activeTasks.length > 0)) {
-  //     const taskIds = [
-  //       ...inProgressTasks.map((task) => task.task_id),
-  //       ...activeTasks.map((task) => task.task_id),
-  //     ];
-  //     MoveTasksToCurrentTasks(taskIds); // Move tasks to "current-tasks"
-  //   }
-  // }, [isLocked]);
+  useEffect(() => {
+    // Check if the session is locked and there are tasks to move
+    if (lockStatus[id] && (inProgressTasks.length > 0 || activeTasks.length > 0)) {
+      const taskIds = [
+        ...inProgressTasks.map((task) => task.task_id),
+        ...activeTasks.map((task) => task.task_id),
+      ];
+      MoveTasksToCurrentTasks(taskIds); 
+    }
+  }, [isLocked]);
 
-  // const MoveTasksToCurrentTasks = async (listOfTaskIds) => {
-  //   const dataToUpdate = listOfTaskIds.map(id => {
-  //     const matchingTask = tasks.find(task => task.task_id === id);
-  //     if (!matchingTask) return null;
-  //     return { task_id: id, coming_from: "current-tasks", moved_to: matchingTask.coming_from };
-  //   }).filter(Boolean);
+  const MoveTasksToCurrentTasks = async (listOfTaskIds) => {
+    const dataToUpdate = listOfTaskIds.map(id => {
+      const matchingTask = tasks.find(task => task.task_id === id);
+      if (!matchingTask) return null;
+      return { task_id: id, coming_from: "current-tasks" };
+    }).filter(Boolean);
 
-  //   if (dataToUpdate.length === 0) return;
+    if (dataToUpdate.length === 0) return;
 
-  //   try {
-  //     await axios.post("https://server-bashboard.vercel.app/apis/tasks/bulk-update", { tasks: dataToUpdate });
-  //     console.log("Tasks moved successfully");
-  //     handleTasksUpdated(dataToUpdate);
-  //   } catch (error) {
-  //     console.error("Error moving tasks:", error);
-  //     hasMovedTasks.current = false; 
-  //   }
-  // };
+    handleTasksUpdated(dataToUpdate);
+  };
 
   const [{ isOver }, drop] = useDrop({
     accept: 'TASK',
@@ -146,4 +140,5 @@ function SessionCard({ id, title, tasks, className, onAddTask, onTaskMove, handl
   );
 }
 
-export default SessionCard;
+// export default SessionCard;
+export default memo(SessionCard);

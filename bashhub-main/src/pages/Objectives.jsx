@@ -22,7 +22,6 @@ import { toast } from "sonner";
 import TagsForm from "@/components/features/tasks/TagsForm";
 
 //  https://server-bashboard.vercel.app/,
-//  https://server-bashboard.vercel.app/
 
 function Objectives() {
   const [activeTab, setActiveTab] = useState("current-tasks");
@@ -106,7 +105,6 @@ function Objectives() {
 
       setTasks((prevTasks) => [taskData, ...prevTasks]);
 
-      // await axios.post(`https://server-bashboard.vercel.app/apis/tasks`, taskData);
       await axios.post(
         "https://server-bashboard.vercel.app/apis/tasks",
         taskData
@@ -139,7 +137,6 @@ function Objectives() {
       );
       setTasks(newTasks);
 
-      // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
       await axios.put(
         `https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`,
         updatedTask
@@ -317,22 +314,19 @@ function Objectives() {
   };
 
 
-  // const handleTasksUpdated = (dataToUpdate) => {
-  //   console.log("Entered handleTasksUpdated")
-  //   const updatedTasks = tasks.map((t) =>{
-  //       const task = dataToUpdate.find(newtask => newtask.task_id === t.task_id);
-  //       if(task){
-  //         return { ...t, ...task }
-  //       }
-  //       return t;
-  //     }
-  //     );
-  //     console.log(updatedTasks);
-  //   setTasks(updatedTasks);
-  //   // const user = JSON.parse(localStorage.getItem("user"));
-  //   //   if (!user) throw new Error("User not found in local storage");
-  //   // fetchTasks(user.user_id);
-  // };
+  const handleTasksUpdated = (dataToUpdate) => {
+    console.log("Entered handleTasksUpdated")
+    const updatedTasks = tasks.map((t) =>{
+        const task = dataToUpdate.find(newtask => newtask.task_id === t.task_id);
+        if(task){
+          return { ...t, ...task }
+        }
+        return t;
+      }
+      );
+      console.log(updatedTasks);
+    setTasks(updatedTasks);
+  };
 
   return (
     <>
@@ -368,7 +362,7 @@ function Objectives() {
                       setIsAddingTask(true);
                     }}
                     onTaskMove={handleTaskMove}
-                    // handleTasksUpdated={handleTasksUpdated}
+                    handleTasksUpdated={handleTasksUpdated}
                   >
                     <SessionTasksList
                       tasks={tasks.filter((task) => task.coming_from === session.id)}

@@ -1,6 +1,3 @@
-
-
-
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -10,11 +7,6 @@ export const SESSION_TIMES = {
   DWS2_LOCK: '16:01',    // 4:00 PM
   DWS3_LOCK: '18:01',    // 6:00 PM
   ALL_UNLOCK: '23:01',   // 11:00 PM
-
-  // DWS1_LOCK: '11:00',  // 1:30 PM
-  // DWS2_LOCK: '11:01',    // 4:00 PM
-  // DWS3_LOCK: '11:02',    // 6:00 PM
-  // ALL_UNLOCK: '23:00:',   // 11:00 PM
   
 };
 
