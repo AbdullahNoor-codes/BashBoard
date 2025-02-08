@@ -31,7 +31,7 @@ export function useTaskAutoMove(tasks, fetchTasks) {
               task_time: task.task_time
             };
             // await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
-            await axios.put(`http://localhost:3000/apis/tasks/${task.task_id}`, updatedTask);
+            await axios.put(`https://server-bashboard.vercel.app/apis/tasks/${task.task_id}`, updatedTask);
           }
 
           // Refresh tasks if any were moved

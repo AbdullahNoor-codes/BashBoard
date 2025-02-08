@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { getCurrentLocalDate } from "@/lib/utils";
 
 function TaskForm({ task: initialTask, onSubmit, onCancel }) {
   console.log(initialTask);
@@ -24,14 +25,7 @@ function TaskForm({ task: initialTask, onSubmit, onCancel }) {
 
   const [errors, setErrors] = useState({});
 
-  // Helper function to get the current date in the local timezone
-  function getCurrentLocalDate() {
-    const now = new Date();
-    const localDate = new Date(
-      now.getTime() - now.getTimezoneOffset() * 60000
-    ).toISOString();
-    return localDate.split("T")[0];
-  }
+
 
   // Update state when initialTask changes
   useEffect(() => {

@@ -24,38 +24,35 @@ function SessionCard({ id, title, tasks, className, onAddTask, onTaskMove, handl
   console.log("isLocked");
   console.log(isLocked);
 
-  useEffect(() => {
-    // Check if the session is locked and there are tasks to move
-    if (lockStatus[id] && (inProgressTasks.length > 0 || activeTasks.length > 0)) {
-      const taskIds = [
-        ...inProgressTasks.map((task) => task.task_id),
-        ...activeTasks.map((task) => task.task_id),
-      ];
-      MoveTasksToCurrentTasks(taskIds); // Move tasks to "current-tasks"
-    }
-  }, [lockStatus[id], inProgressTasks, activeTasks]);
+  // useEffect(() => {
+  //   // Check if the session is locked and there are tasks to move
+  //   if (lockStatus[id] && (inProgressTasks.length > 0 || activeTasks.length > 0)) {
+  //     const taskIds = [
+  //       ...inProgressTasks.map((task) => task.task_id),
+  //       ...activeTasks.map((task) => task.task_id),
+  //     ];
+  //     MoveTasksToCurrentTasks(taskIds); // Move tasks to "current-tasks"
+  //   }
+  // }, [isLocked]);
 
-  const MoveTasksToCurrentTasks = async (listOfTaskIds) => {
-    const updates= {
-      coming_from: "current-tasks", // Update the 'coming_from' field
-      // is_in_progress: false,       // Optionally update other fields
-    }
-    const task_ids = listOfTaskIds;
-    try {
-      const requestBody = {
-        task_ids,
-        updates
-      };
-  
-      await axios.post('https://server-bashboard.vercel.app/apis/tasks/bulk-update', requestBody);
-  
-      console.log("Tasks moved to current-tasks successfully");
-      
-      handleTasksUpdated(task_ids, updates);
-    } catch (error) {
-      console.error("Error moving tasks to current-tasks:", error);
-    }
-  };
+  // const MoveTasksToCurrentTasks = async (listOfTaskIds) => {
+  //   const dataToUpdate = listOfTaskIds.map(id => {
+  //     const matchingTask = tasks.find(task => task.task_id === id);
+  //     if (!matchingTask) return null;
+  //     return { task_id: id, coming_from: "current-tasks", moved_to: matchingTask.coming_from };
+  //   }).filter(Boolean);
+
+  //   if (dataToUpdate.length === 0) return;
+
+  //   try {
+  //     await axios.post("https://server-bashboard.vercel.app/apis/tasks/bulk-update", { tasks: dataToUpdate });
+  //     console.log("Tasks moved successfully");
+  //     handleTasksUpdated(dataToUpdate);
+  //   } catch (error) {
+  //     console.error("Error moving tasks:", error);
+  //     hasMovedTasks.current = false; 
+  //   }
+  // };
 
   const [{ isOver }, drop] = useDrop({
     accept: 'TASK',

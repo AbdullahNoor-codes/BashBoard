@@ -6,14 +6,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Pencil, FolderInput, Trash, Eye, Tags } from "lucide-react";
+import {
+  MoreVertical,
+  Pencil,
+  FolderInput,
+  Trash,
+  Eye,
+  Tags,
+} from "lucide-react";
 
 function TaskList({ tasks, onEdit, onView, onMove, onDelete, onAddTag }) {
   if (!tasks.length) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        No tasks available
-      </div>
+      <div className="text-center py-12 text-gray-500">No tasks available</div>
     );
   }
   return (
@@ -34,23 +39,29 @@ function TaskList({ tasks, onEdit, onView, onMove, onDelete, onAddTag }) {
               >
                 {task.task_name}
               </h3>
-              <div className="text-sm text-gray-500 line-clamp-2 overflow-hidden text-ellipsis">
+              {/* <div className="text-sm text-gray-500 line-clamp-2 overflow-hidden text-ellipsis mt-1 whitespace-normal break-word">
+                {task.task_desc}
+              </div> */}
+              <div
+                className="text-sm text-gray-500 mt-1 whitespace-normal break-words line-clamp-2 overflow-hidden text-ellipsis"
+                style={{ wordBreak: "break-word" }}
+              >
                 {task.task_desc}
               </div>
               <div className="flex flex-wrap gap-2 mt-1">
-              {task.task_tags && task.task_tags.length > 0 ? (
-                task.task_tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="text-xs bg-gray-200 text-gray-800 px-2 py-0.5 rounded"
-                  >
-                    {tag}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-gray-500">No tags</span>
-              )}
-            </div>
+                {task.task_tags && task.task_tags.length > 0 ? (
+                  task.task_tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="text-xs bg-gray-200 text-gray-800 px-2 py-0.5 rounded"
+                    >
+                      {tag}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-gray-500">No tags</span>
+                )}
+              </div>
               {/* <p className={`text-sm text-gray-600 mt-1`}>
                 {task.task_desc}
               </p> */}
@@ -93,9 +104,9 @@ function TaskList({ tasks, onEdit, onView, onMove, onDelete, onAddTag }) {
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onAddTag(task)}>
-                <Tags className="w-4 h-4 mr-2" />
-                Add tag
-              </DropdownMenuItem>
+                    <Tags className="w-4 h-4 mr-2" />
+                    Add tag
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onMove(task)}>
                     <FolderInput className="w-4 h-4 mr-2" />
                     Move

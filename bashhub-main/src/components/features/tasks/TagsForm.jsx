@@ -76,7 +76,7 @@ function TagsForm({ task: initialTask, onSubmit, onCancel, optionTags }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto">
       {/* Input for adding tags */}
       <div className="flex gap-2">
         <Input
@@ -93,7 +93,7 @@ function TagsForm({ task: initialTask, onSubmit, onCancel, optionTags }) {
       {/* Display added tags */}
       <div>
         <strong>Added Tags:</strong>
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-2 mt-2 max-h-32 overflow-y-auto">
           {task.task_tags.length > 0 ? (
             task.task_tags.map((tag, index) => (
               <span
@@ -121,7 +121,7 @@ function TagsForm({ task: initialTask, onSubmit, onCancel, optionTags }) {
       {optionTags && optionTags.length > 0 && (
         <div>
           <strong>Select Tags:</strong>
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap gap-2 mt-2 max-h-32 overflow-y-auto">
             {optionTags.map((tag, index) => (
               <button
                 key={index}
@@ -140,7 +140,7 @@ function TagsForm({ task: initialTask, onSubmit, onCancel, optionTags }) {
       )}
 
       {/* Form Actions */}
-      <div className="flex justify-end space-x-2">
+      <div className="flex justify-end space-x-2 sticky bottom-0 bg-white p-2">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>

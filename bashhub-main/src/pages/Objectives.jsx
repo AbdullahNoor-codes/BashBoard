@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import SessionCard from "../components/features/objectives/SessionCard";
 import SessionTasksList from "../components/features/objectives/SessionTasksList";
@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useTaskAutoMove } from "@/hooks/useTaskAutoMove";
-import { isTaskFromToday, isSameDay } from "@/lib/utils";
+import { isTaskFromToday, isSameDay, getCurrentLocalDate } from "@/lib/utils";
 import { useSessionLock } from "@/hooks/useSessionLock";
 import { toast } from "sonner";
 import TagsForm from "@/components/features/tasks/TagsForm";
@@ -130,6 +130,7 @@ function Objectives() {
       if (!user) throw new Error("User not found in local storage");
       const updatedTask = {
         ...task,
+        date: getCurrentLocalDate(),
         is_complete: true,
         is_in_progress: false,
       };
@@ -315,25 +316,23 @@ function Objectives() {
     }
   };
 
-  const handleTasksUpdated = (taskIdList, updates) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((t) =>
-        taskIdList.includes(t.task_id) ? { ...t, ...updates } : t
-      )
-    );
-  };
 
-  const filterTodaysTasks = (sessionId) => {
-    console.log("Entered filterTodaysTasks");
-    console.log(tasks);
-    if (!Array.isArray(tasks)) {
-      console.error("Tasks is not an array:", tasks);
-      return [];
-    }
-    return tasks.filter((task) => {
-      return task.coming_from === sessionId;
-    });
-  };
+  // const handleTasksUpdated = (dataToUpdate) => {
+  //   console.log("Entered handleTasksUpdated")
+  //   const updatedTasks = tasks.map((t) =>{
+  //       const task = dataToUpdate.find(newtask => newtask.task_id === t.task_id);
+  //       if(task){
+  //         return { ...t, ...task }
+  //       }
+  //       return t;
+  //     }
+  //     );
+  //     console.log(updatedTasks);
+  //   setTasks(updatedTasks);
+  //   // const user = JSON.parse(localStorage.getItem("user"));
+  //   //   if (!user) throw new Error("User not found in local storage");
+  //   // fetchTasks(user.user_id);
+  // };
 
   return (
     <>
@@ -363,16 +362,16 @@ function Objectives() {
                   <SessionCard
                     id={session.id}
                     title={session.title}
-                    tasks={filterTodaysTasks(session.id)}
+                    tasks={tasks.filter((task) => task.coming_from === session.id)}
                     onAddTask={(sessionId) => {
                       setSelectedSessionId(sessionId);
                       setIsAddingTask(true);
                     }}
                     onTaskMove={handleTaskMove}
-                    handleTasksUpdated={handleTasksUpdated}
+                    // handleTasksUpdated={handleTasksUpdated}
                   >
                     <SessionTasksList
-                      tasks={filterTodaysTasks(session.id)}
+                      tasks={tasks.filter((task) => task.coming_from === session.id)}
                       onDeleteTask={handleDeleteTask}
                       onEditTask={handleEditTask}
                       onViewTask={handleViewTask}
@@ -397,7 +396,7 @@ function Objectives() {
                 key={session.id}
                 id={session.id}
                 title={session.title}
-                tasks={filterTodaysTasks(session.id)}
+                tasks={tasks.filter((task) => task.coming_from === session.id)}
                 className="min-w-[400px] max-w-[400px]"
                 onAddTask={(sessionId) => {
                   setSelectedSessionId(sessionId);
@@ -407,7 +406,7 @@ function Objectives() {
                 handleTasksUpdated={handleTasksUpdated}
               >
                 <SessionTasksList
-                  tasks={filterTodaysTasks(session.id)}
+                  tasks={tasks.filter((task) => task.coming_from === session.id)}
                   onDeleteTask={handleDeleteTask}
                   onEditTask={handleEditTask}
                   onAddTag={handleAddTag}

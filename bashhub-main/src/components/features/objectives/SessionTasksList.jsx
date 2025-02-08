@@ -64,9 +64,12 @@ function SessionTasksList({
 
           <div>
             <p className="font-semibold line-clamp-1">{task.task_name}</p>
-            <div className="text-sm text-gray-500 line-clamp-1 overflow-hidden text-ellipsis">
+            <div
+                className="text-sm text-gray-500 mt-1 whitespace-normal break-words line-clamp-1 overflow-hidden text-ellipsis"
+                style={{ wordBreak: "break-word" }}
+              >
                 {task.task_desc}
-              </div> 
+              </div>
 
               {/* Render Tags */}
             <div className="flex flex-wrap gap-2 mt-1">

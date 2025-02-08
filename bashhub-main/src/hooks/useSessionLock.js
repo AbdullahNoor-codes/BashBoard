@@ -43,7 +43,7 @@ export function useSessionLock() {
 
     // Initial check and interval setup
     checkLockStatus(); // Perform an initial check
-    const interval = setInterval(checkLockStatus, 60000); // Check every minute
+    const interval = setInterval(checkLockStatus, 200); // Check every minute
 
     // Cleanup interval on unmount
     return () => clearInterval(interval);

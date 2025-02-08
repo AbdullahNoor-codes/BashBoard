@@ -28,7 +28,7 @@ function Sidebar() {
     { path: '/sessions', label: 'Sessions', icon: Target },
     { path: '/reports', label: 'Reports', icon: FileText },
   ];
-
+  const user = JSON.parse(localStorage.getItem("user"));
   return (
     <>
       {/* Mobile Menu Button */}
@@ -50,7 +50,7 @@ function Sidebar() {
       >
         {/* Logo and Logout/Login */}
         <div className="h-16 flex items-center px-6 border-b border-gray-200">
-          <span className="text-xl font-semibold">DeepWork</span>
+          <span className="text-xl font-semibold">{user.username}</span>
           <Button
             className="ml-auto"
             onClick={handleLogout}
