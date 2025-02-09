@@ -9,64 +9,6 @@ const Login = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    // const handleLogin = async () => {
-    //     setError(''); // Clear any previous errors
-
-    //     try {
-    //         // Make a POST request to the /login API endpoint
-    //         const response = await axios.post('https://server-bashboard.vercel.app/login', {
-    //                 username,
-    //             password,
-    //         });
-
-    //         // If login is successful
-    //         if (response.data.message === 'Login successful') {
-    //             localStorage.setItem('isLoggedIn', 'true');
-    //             localStorage.setItem('user', JSON.stringify(response.data.user)); // Store user data
-    //         } else {
-    //             setError('Invalid credentials');
-    //         }
-    //         navigate('/');
-    //     } catch (err) {
-    //         // Handle errors (e.g., network error, invalid credentials)
-    //         if (err.response && err.response.data.message) {
-    //             setError(err.response.data.message);
-    //         } else {
-    //             setError('An error occurred. Please try again.');
-    //         }
-    //     }
-    // };
-
-
-    // const handleLogin = async () => {
-    //     setError(''); // Clear any previous errors
-      
-    //     try {
-    //       // Make a POST request to the /login API endpoint
-    //       const response = await axios.post('https://server-bashboard.vercel.app/login', {
-    //         username,
-    //         password,
-    //       });
-      
-    //       // If login is successful
-    //       if (response.data.message === 'Login successful') {
-    //         localStorage.setItem('isLoggedIn', 'true');
-    //         localStorage.setItem('user', JSON.stringify(response.data.user)); // Store user data
-    //         navigate('/', { replace: true }); // Redirect to home page
-    //       } else {
-    //         setError('Invalid credentials');
-    //       }
-    //     } catch (err) {
-    //       // Handle errors (e.g., network error, invalid credentials)
-    //       if (err.response && err.response.data.message) {
-    //         setError(err.response.data.message);
-    //       } else {
-    //         setError('An error occurred. Please try again.');
-    //       }
-    //     }
-    //   };
-
-
     const handleLogin = async () => {
         setError(''); // Clear any previous errors
       
