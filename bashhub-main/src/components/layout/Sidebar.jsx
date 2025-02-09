@@ -14,9 +14,15 @@ function Sidebar() {
     setIsMobileMenuOpen(false);
   }, [location]);
 
+  // const handleLogout = () => {
+  //   localStorage.removeItem('isLoggedIn');
+  //   navigate('/login');
+  // };
+
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
-    navigate('/login');
+    localStorage.removeItem('user');
+    navigate('/login', { replace: true });
   };
 
   const toggleMobileMenu = () => {

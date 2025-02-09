@@ -6,16 +6,12 @@ import Objectives from './pages/Objectives';
 import Reports from './pages/Reports';
 import Login from './pages/Login';
 import NotificationService from '@/utils/NotificationService';
-
-// Utility function to check if the user is authenticated
 const isAuthenticated = () => {
-  // For demonstration purposes, we'll use localStorage to store an "authToken".
   return localStorage.getItem("isLoggedIn");
 };
 
 function App() {
   useEffect(() => {
-    // Initialize notifications when app starts
     NotificationService.requestPermission();
     NotificationService.registerServiceWorker();
   }, []);
@@ -29,26 +25,14 @@ function App() {
             path="/"
             element={isAuthenticated() ? <Tasks /> : <Navigate to="/login" />}
           />
-          {/* <Route
-            path="/"
-            element={<Tasks />}
-          /> */}
           <Route
             path="/sessions"
             element={isAuthenticated() ? <Objectives /> : <Navigate to="/login" />}
           />
-          {/* <Route
-            path="/sessions"
-            element={<Objectives />}
-          /> */}
           <Route
             path="/reports"
             element={isAuthenticated() ? <Reports /> : <Navigate to="/login" />}
           />
-          {/* <Route
-            path="/reports"
-            element={<Reports />}
-          /> */}
         </Routes>
       </Layout>
     </Router>
