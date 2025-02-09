@@ -45,7 +45,7 @@ import { Toaster } from 'sonner';
 //   );
 // }
 
-// export default Layout;
+
 
 
 function Layout({ children }) {
@@ -78,3 +78,5 @@ function Layout({ children }) {
   // If not logged in and not on the login page, redirect to login
   return <Navigate to="/login" replace />;
 }
+
+export default Layout;
