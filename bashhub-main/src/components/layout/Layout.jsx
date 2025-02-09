@@ -18,6 +18,7 @@ import React from 'react';
 import Sidebar from './Sidebar';
 import { useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
+import { BrowserRouter as Navigate } from 'react-router-dom';
 
 // function Layout({ children }) {
 //   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
