@@ -1,300 +1,213 @@
 const pool = require("../db");
-const moment = require('moment-timezone');
 
-// const getAllTasks = async (req, res) => {
-//   const { userId } = req.query; // Extract userId from query parameters
-//   console.log(`user id: `, userId);
-//   try {
-//     if (!userId) {
-//       return res.status(400).json({ message: "User ID is required" });
-//     }
-//     const tasks = await pool.query(
-//       "SELECT task_id, task_name, task_tags, task_desc, coming_from, is_in_progress, is_complete, moved_to, user_id, " +
-//       "TO_CHAR(date, 'YYYY-MM-DD') AS date FROM tasks WHERE user_id = $1 ORDER BY date DESC",
-//       [userId]
-//     );
-//     console.log(`tasks: `, tasks.rows);
-//     res.status(200).json(tasks.rows);
-//   } catch (err) {
-//     console.error(`Error fetching tasks: ${err.message}`, err);
-//     res
-//       .status(500)
-//       .json({ message: `Server error: ${err.message}`, error: err.message });
-//   }
-// };
-
-
-
-
+// . Get all tasks (with optional project filtering)
 const getAllTasks = async (req, res) => {
-  const { userId } = req.query; // Extract userId from query parameters
-  console.log(`user id: `, userId);
+  const { userId, projectId } = req.query;
+  if (!userId) return res.status(400).json({ message: "User ID is required" });
+
+  const query = `
+    SELECT * FROM tasks
+    WHERE user_id = $1 ${projectId ? "AND project_id = $2" : ""}
+    ORDER BY date DESC
+  `;
+
   try {
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
-    }
-
-    // Get the current date in Asia/Karachi timezone in YYYY-MM-DD format
-    const currentDateInAsiaKarachi = new Date().toLocaleDateString('en-CA', {
-      timeZone: 'Asia/Karachi',
-    });
-
-    const tasks = await pool.query(
-      `
-        SELECT task_id, task_name, task_tags, task_desc, coming_from, is_in_progress, is_complete, moved_to, user_id, 
-               TO_CHAR(date, 'YYYY-MM-DD') AS date 
-        FROM tasks 
-        WHERE user_id = $1 
-          AND NOT (is_complete = TRUE AND TO_CHAR(date, 'YYYY-MM-DD') != $2)
-        ORDER BY date DESC
-      `,
-      [userId, currentDateInAsiaKarachi]
-    );
-
-    console.log(`tasks: `, tasks.rows);
-    res.status(200).json(tasks.rows);
+    const { rows } = await pool.query(query, projectId ? [userId, projectId] : [userId]);
+    res.status(200).json(rows);
   } catch (err) {
-    console.error(`Error fetching tasks: ${err.message}`, err);
-    res
-      .status(500)
-      .json({ message: `Server error: ${err.message}`, error: err.message });
+    res.status(500).json({ message: `Error fetching tasks: ${err.message}` });
   }
 };
 
-
+// . Get specific task by ID
 const getSpecificTasks = async (req, res) => {
-  const { id } = req.params;
   try {
-    const tasks = await pool.query(
-      "SELECT task_id, task_name, task_desc, coming_from, is_in_progress, is_complete, moved_to, user_id, " +
-      "TO_CHAR(date, 'YYYY-MM-DD') AS date FROM tasks WHERE task_id = $1",
-      [id]
-    );
-    res.status(200).json(tasks.rows);
+    const { rows } = await pool.query("SELECT * FROM tasks WHERE task_id = $1", [req.params.id]);
+    rows.length ? res.json(rows[0]) : res.status(404).json({ message: "Task not found" });
   } catch (err) {
-    console.error(`Error fetching task with ID ${id}: ${err.message}`, err);
-    res
-      .status(500)
-      .json({ message: `Server error ${err.message}`, error: err.message });
+    res.status(500).json({ message: `Error: ${err.message}` });
   }
 };
 
-
-
-
+// . Create task with project association
 const createTask = async (req, res) => {
-    const { task_id, task_name, task_tags, date, task_desc, coming_from, is_in_progress, is_complete, moved_to, user_id } = req.body;
-    console.log(`Creating task: ${task_name}, User ID: ${user_id}`);
-    console.log(`date`);
-    console.log(date);
-    try {
-        const newTask = await pool.query(
-            'INSERT INTO tasks (task_id, task_name, task_tags, task_desc, date, coming_from, is_in_progress, is_complete, moved_to, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-            [task_id, task_name, task_tags, task_desc, date, coming_from, is_in_progress, is_complete, moved_to, user_id]
-        );
-        console.log("Task created successfully:", newTask.rows[0]);
-        res.status(201).json(newTask.rows[0]);
-    } catch (err) {
-        console.error(`Error creating task: ${err.message}`, err);
-        res.status(500).json({ message: `Task could not be saved ${err.message}`, error: err.message });
-    }
+  const { task_id, task_name, task_desc, date, user_id, project_id } = req.body;
+  if (!task_name || !user_id) return res.status(400).json({ message: "Task name and user ID are required" });
+
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO tasks (task_id, task_name, task_desc, date, user_id, project_id)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [task_id, task_name, task_desc, date, user_id, project_id]
+    );
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    res.status(500).json({ message: `Error creating task: ${err.message}` });
+  }
 };
 
-
-
-
-// const createTask = async (req, res) => {
-//   const { task_id, task_name, task_tags, task_desc, coming_from, is_in_progress, is_complete, moved_to, user_id } = req.body;
-
-//   // Log the task creation request
-//   console.log(`Creating task: ${task_name}, User ID: ${user_id}`);
+// . Update task by ID
+// const updateTask = async (req, res) => {
+//   const { id } = req.params;
+//   const { task_name, task_desc, date, project_id, is_in_progress, is_complete } = req.body;
 
 //   try {
-//       const nowKarachi = moment().tz("Asia/Karachi");
-//       const currentDateKarachi = nowKarachi.format();
-//       console.log(`Generated date for task (Asia/Karachi): ${currentDateKarachi}`);
+//     const { rows } = await pool.query(
+//       `UPDATE tasks SET 
+//         task_name = $1, task_desc = $2, date = $3,
+//         project_id = $4, is_in_progress = $5, is_complete = $6
+//        WHERE task_id = $7 RETURNING *`,
+//       [task_name, task_desc, date, project_id, is_in_progress, is_complete, id]
+//     );
 
-//       // Insert the task into the database with the generated date
-//       const newTask = await pool.query(
-//           'INSERT INTO tasks (task_id, task_name, task_tags, task_desc, date, coming_from, is_in_progress, is_complete, moved_to, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-//           [
-//               task_id,
-//               task_name,
-//               task_tags,
-//               task_desc,
-//               currentDateKarachi, 
-//               coming_from,
-//               is_in_progress,
-//               is_complete,
-//               moved_to,
-//               user_id
-//           ]
-//       );
-
-//       console.log("Task created successfully:", newTask.rows[0]);
-
-//       res.status(201).json(newTask.rows[0]);
+//     rows.length ? res.json(rows[0]) : res.status(404).json({ message: "Task not found" });
 //   } catch (err) {
-//       console.error(`Error creating task: ${err.message}`, err);
-//       res.status(500).json({ message: `Task could not be saved: ${err.message}`, error: err.message });
+//     res.status(500).json({ message: `Update failed: ${err.message}` });
 //   }
 // };
 
-
+// . Updated updateTask Controller
 const updateTask = async (req, res) => {
   const { id } = req.params;
-  console.log(req.body);
-
-  let { task_name, task_tags, task_desc, date, coming_from, is_in_progress, is_complete, moved_to } = req.body;
-  console.log(date);
-  if (date) {
-      date = new Date(date).toISOString().split("T")[0];
-  }
+  const {
+    task_name,
+    task_desc,
+    date,
+    project_id,
+    is_in_progress,
+    is_complete,
+    task_tags,      // . New: Update tags
+    moved_to,       // . New: Update moved_to
+    coming_from     // . New: Update coming_from
+  } = req.body;
 
   try {
-      const updatedTask = await pool.query(
-          'UPDATE tasks SET task_name = $1, task_tags= $2, task_desc= $3, date = $4, coming_from = $5, is_in_progress = $6, is_complete = $7, moved_to = $8 WHERE task_id = $9 RETURNING *',
-          [task_name, task_tags, task_desc, date, coming_from, is_in_progress, is_complete, moved_to, id]
-      );
+    const { rows } = await pool.query(
+      `UPDATE tasks SET 
+        task_name = $1,
+        task_desc = $2,
+        date = $3,
+        project_id = $4,
+        is_in_progress = $5,
+        is_complete = $6,
+        task_tags = $7,      -- . Handle task_tags
+        moved_to = $8,       -- . Handle moved_to
+        coming_from = $9     -- . Handle coming_from
+      WHERE task_id = $10
+      RETURNING *`,
+      [
+        task_name,
+        task_desc,
+        date,
+        project_id,
+        is_in_progress,
+        is_complete,
+        task_tags ?? [],      // Default to empty array if undefined
+        moved_to ?? null,     // Handle null for moved_to
+        coming_from ?? null,  // Handle null for coming_from
+        id
+      ]
+    );
 
-      console.log("Task updated successfully:", updatedTask.rows[0]);
-      res.status(200).json(updatedTask.rows[0]);
+    rows.length
+      ? res.json(rows[0])  // . Return updated task
+      : res.status(404).json({ message: "Task not found" });
   } catch (err) {
-      console.error(`Error updating task ID ${id}: ${err.message}`, err);
-      res.status(500).json({ message: `Server error ${err.message}`, error: err.message });
+    console.error("Update error:", err.message);
+    res.status(500).json({ message: `Update failed: ${err.message}` });
   }
+  
 };
 
 
+// . Delete task by ID
+const deleteTask = async (req, res) => {
+  try {
+    const { rowCount } = await pool.query("DELETE FROM tasks WHERE task_id = $1", [req.params.id]);
+    rowCount ? res.json({ message: "Task deleted" }) : res.status(404).json({ message: "Task not found" });
+  } catch (err) {
+    res.status(500).json({ message: `Delete error: ${err.message}` });
+  }
+};
+
+// . Get tasks by specific project
+const getTasksByProject = async (req, res) => {
+  const { user_id, project_id } = req.query;
+  if (!user_id || !project_id) return res.status(400).json({ message: "User ID and Project ID are required" });
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM tasks WHERE user_id = $1 AND project_id = $2 ORDER BY date DESC`,
+      [user_id, project_id]
+    );
+    res.status(200).json(rows);
+  } catch (err) {
+    res.status(500).json({ message: `Error fetching tasks: ${err.message}` });
+  }
+};
+
+// . Bulk update tasks
 const bulkUpdateTasks = async (req, res) => {
   const { tasks } = req.body;
 
-  // Validate tasks array
   if (!Array.isArray(tasks) || tasks.length === 0) {
-    return res
-      .status(400)
-      .json({ message: "Invalid or empty tasks provided" });
+    return res.status(400).json({ message: "Invalid or empty tasks provided" });
   }
 
   try {
-    // Prepare an array to store the results of all updates
     const updatedTasks = [];
 
-    // Loop through each task in the tasks array
     for (const task of tasks) {
-      const { task_id, ...updates } = task; // Extract the task ID and the fields to update
+      const { task_id, ...updates } = task;
+      if (!task_id || Object.keys(updates).length === 0) continue;
 
-      // Validate task ID
-      if (!task_id) {
-        console.error(`Invalid task data: ${JSON.stringify(task)}`);
-        continue; // Skip invalid tasks
-      }
+      const setClause = Object.keys(updates).map((field, index) => `${field} = $${index + 1}`).join(", ");
+      const updateValues = [...Object.values(updates), task_id];
 
-      // Validate that there are fields to update
-      if (Object.keys(updates).length === 0) {
-        console.error(`No fields to update for task ID: ${task_id}`);
-        continue; // Skip tasks with no updates
-      }
-
-      // Dynamically construct the SET clause for the SQL query
-      const setClause = Object.keys(updates)
-        .map((field, index) => `${field} = $${index + 1}`)
-        .join(", ");
-
-      // Construct the SQL query
       const query = `
-        UPDATE tasks 
+        UPDATE tasks
         SET ${setClause}
         WHERE task_id = $${Object.keys(updates).length + 1}
         RETURNING *
       `;
 
-      // Prepare the values for the query
-      const updateValues = [...Object.values(updates), task_id];
-
-      // Execute the query
-      const result = await pool.query(query, updateValues);
-
-      // Add the updated task to the results array
-      if (result.rows.length > 0) {
-        updatedTasks.push(result.rows[0]);
-      }
+      const { rows } = await pool.query(query, updateValues);
+      if (rows.length) updatedTasks.push(rows[0]);
     }
 
-    // Return the response
-    if (updatedTasks.length > 0) {
-      console.log("Bulk update successful", updatedTasks);
-      res.status(200).json({
-        message: "Tasks updated successfully",
-        updated_tasks: updatedTasks,
-      });
-    } else {
-      res.status(400).json({ message: "No tasks were updated" });
-    }
+    updatedTasks.length
+      ? res.status(200).json({ message: "Tasks updated successfully", updated_tasks: updatedTasks })
+      : res.status(400).json({ message: "No tasks were updated" });
   } catch (err) {
-    console.error(`Error in bulk updating tasks: ${err.message}`, err);
-    res.status(500).json({
-      message: `Server error: ${err.message}`,
-      error: err.message,
-    });
+    res.status(500).json({ message: `Bulk update error: ${err.message}` });
   }
 };
 
-
-const deleteTask = async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query("DELETE FROM tasks WHERE task_id = $1", [id]);
-    console.log(`Task ID ${id} deleted successfully`);
-    res.status(200).json({ message: "Task deleted successfully" });
-  } catch (err) {
-    console.error(`Error deleting task ID ${id}: ${err.message}`, err);
-    res
-      .status(500)
-      .json({ message: `Server error ${err.message}`, error: err.message });
-  }
-};
-
-
+// . Get task report by user and date
 const getTaskReport = async (req, res) => {
   const { userId, date } = req.params;
-  console.log(`Fetching report for user_id: ${userId}, date: ${date}`);
 
   try {
-    // Query the database for the report
-    const report = await pool.query(
+    const { rows } = await pool.query(
       "SELECT data FROM reports WHERE user_id = $1 AND date = $2",
       [userId, date]
     );
 
-    console.log(`Query result:`, report.rows);
-
-    // If no report exists, return an empty object with a 200 status
-    if (report.rows.length === 0) {
-      console.log("No report exists for user_id:", userId, "and date:", date);
-      return res.status(200).json({}); // Return an empty object
-    }
-
-    // Return the report data
-    console.log("Returning report data:", report.rows[0].data); // Log the returned data
-    res.status(200).json(report.rows[0].data);
+    rows.length
+      ? res.status(200).json(rows[0].data)
+      : res.status(200).json({ message: "No report found" });
   } catch (err) {
-    console.error(`Error fetching Report of user_id ${userId}: ${err.message}`, err);
-    res.status(500).json({
-      message: `Server error: ${err.message}`,
-      error: err.message,
-    });
+    res.status(500).json({ message: `Report fetch error: ${err.message}` });
   }
 };
 
-
-
 module.exports = {
   getAllTasks,
+  getSpecificTasks,
   createTask,
   updateTask,
   deleteTask,
-  getSpecificTasks,
+  getTasksByProject,
   bulkUpdateTasks,
-  getTaskReport
+  getTaskReport,
 };

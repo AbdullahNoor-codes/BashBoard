@@ -20,22 +20,29 @@ import { isTaskFromToday, isSameDay, getCurrentLocalDate } from "@/lib/utils";
 import { useSessionLock } from "@/hooks/useSessionLock";
 import { toast } from "sonner";
 import TagsForm from "@/components/features/tasks/TagsForm";
+import ProjectNavBar from "@/components/layout/ProjectNavbar";
 
 //  https://server-bashboard.vercel.app/,
 
 function Objectives() {
   const [activeTab, setActiveTab] = useState("current-tasks");
-  const [isAddingTask, setIsAddingTask] = useState(false);
+  // const [isAddingTask, setIsAddingTask] = useState(false);
   const [isEditingTask, setIsEditingTask] = useState(false);
   const [isViewingTask, setIsViewingTask] = useState(false);
   const [IsAddingTag, setIsAddingTag] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState(null);
+  // const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [tags, setTags] = useState([]);
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [taskToAddTags, setTaskTags] = useState(null);
   const [taskToView, setTaskToView] = useState(null);
   const lockStatus = useSessionLock();
+
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    localStorage.getItem("selectedProjectId") || null
+  );
+  const [selectedSessionId, setSelectedSessionId] = useState("current-tasks");
+  const [isAddingTask, setIsAddingTask] = useState(false);
 
   const sessions = [
     { id: "current-tasks", title: "Current Task" },
@@ -46,81 +53,139 @@ function Objectives() {
   ];
 
   // Fetch all tasks when the component mounts
+  // useEffect(() => {
+  //   try {
+  //     const user = JSON.parse(localStorage.getItem("user"));
+  //     if (!user) throw new Error("User not found in local storage");
+  //     fetchTasks(user.user_id);
+  //   } catch (error) {
+  //     console.error("Error fetching task:", error);
+  //   }
+  // }, []);
+
   useEffect(() => {
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user) throw new Error("User not found in local storage");
-      fetchTasks(user.user_id);
-    } catch (error) {
-      console.error("Error fetching task:", error);
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && selectedProjectId) {
+      fetchTasks(user.user_id, selectedProjectId);  // . Fetch tasks for selected project
     }
-  }, []);
-
-  const fetchTasks = async (userId) => {
-    console.log("entered fetchTasks");
-    let loadingToastId;
+  }, [selectedProjectId]);
+  
+  // const fetchTasks = async (userId) => {
+  //   console.log("entered fetchTasks");
+  //   let loadingToastId;
+  //   try {
+  //     loadingToastId = toast.loading("Loading Tasks");
+  //     const response = await axios.get(
+  //       `https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`
+  //     );
+  //     const responseData = Array.isArray(response.data) ? response.data : [];
+  //     console.log(responseData);
+  //     toast.dismiss(loadingToastId);
+  //     setTasks(responseData); // Ensure tasks is always an array
+  //     const uniqueTags = [
+  //       ...new Set(
+  //         responseData.flatMap((task) => task.task_tags).filter((tag) => tag)
+  //       ),
+  //     ];
+  //     setTags(uniqueTags);
+  //   } catch (error) {
+  //     toast.dismiss(loadingToastId);
+  //     toast.error("Sorry, try again. Could not load tasks.");
+  //     console.error("Error fetching tasks:", error);
+  //   }
+  // };
+  const fetchTasks = async (userId, projectId) => {
     try {
-      loadingToastId = toast.loading("Loading Tasks");
-      const response = await axios.get(
-        `https://server-bashboard.vercel.app/apis/tasks?userId=${userId}`
-      );
-      const responseData = Array.isArray(response.data) ? response.data : [];
-      console.log(responseData);
-      toast.dismiss(loadingToastId);
-      setTasks(responseData); // Ensure tasks is always an array
-      const uniqueTags = [
-        ...new Set(
-          responseData.flatMap((task) => task.task_tags).filter((tag) => tag)
-        ),
-      ];
-      setTags(uniqueTags);
+      const { data } = await axios.get(`http://localhost:3000/apis/tasks`, {
+        params: { userId, projectId },
+      });
+  
+      console.log("Fetched Tasks:", data);  // Check response
+  
+      const cleanedTasks = Array.isArray(data)
+        ? data.map(task => ({
+            ...task,
+            coming_from: task.coming_from ?? "current-tasks",  //  Default to "current-tasks"
+          }))
+        : [];
+  
+      setTasks([...cleanedTasks]);
     } catch (error) {
-      toast.dismiss(loadingToastId);
-      toast.error("Sorry, try again. Could not load tasks.");
-      console.error("Error fetching tasks:", error);
+      console.error("Failed to load tasks:", error);
+      toast.error("Failed to load tasks");
     }
   };
+  
+  
 
+  // const handleAddTask = async (newTask) => {
+  //   let loadingToastId;
+  //   let taskData;
+  //   try {
+  //     loadingToastId = toast.loading("Creating Task");
+
+  //     const user = JSON.parse(localStorage.getItem("user"));
+  //     if (!user) throw new Error("User not found in local storage");
+
+  //     taskData = {
+  //       task_id: crypto.randomUUID(),
+  //       task_name: newTask.task_name,
+  //       task_tags: [],
+  //       task_desc: newTask.task_desc,
+  //       date: newTask.date,
+  //       coming_from: selectedSessionId,
+  //       moved_to: "",
+  //       is_in_progress: false,
+  //       is_complete: false,
+  //       user_id: user.user_id,
+  //     };
+
+  //     setTasks((prevTasks) => [taskData, ...prevTasks]);
+
+  //     await axios.post(
+  //       "https://server-bashboard.vercel.app/apis/tasks",
+  //       taskData
+  //     );
+  //     setIsAddingTask(false);
+  //     toast.dismiss(loadingToastId);
+  //     toast.success("Task Create Successfully!");
+  //   } catch (error) {
+  //     toast.dismiss(loadingToastId);
+  //     toast.error("Sorry Try again, could not Add Task");
+  //     setTasks((prevTasks) =>
+  //       prevTasks.filter((task) => task.task_id !== taskData.task_id)
+  //     );
+  //     console.error("Error adding task:", error.message || error);
+  //   }
+  // };
   const handleAddTask = async (newTask) => {
-    let loadingToastId;
-    let taskData;
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !selectedProjectId) {
+      toast.error("User or project missing.");
+      return;
+    }
+  
+    const taskData = {
+      task_id: crypto.randomUUID(),
+      project_id: selectedProjectId,  // Link task to selected project
+      user_id: user.user_id,
+      task_name: newTask.task_name,
+      task_desc: newTask.task_desc,
+      date: newTask.date,
+      coming_from: selectedSessionId ?? "current-tasks",  //  Assign to the selected session
+    };
+  
     try {
-      loadingToastId = toast.loading("Creating Task");
-
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user) throw new Error("User not found in local storage");
-
-      taskData = {
-        task_id: crypto.randomUUID(),
-        task_name: newTask.task_name,
-        task_tags: [],
-        task_desc: newTask.task_desc,
-        date: newTask.date,
-        coming_from: selectedSessionId,
-        moved_to: "",
-        is_in_progress: false,
-        is_complete: false,
-        user_id: user.user_id,
-      };
-
-      setTasks((prevTasks) => [taskData, ...prevTasks]);
-
-      await axios.post(
-        "https://server-bashboard.vercel.app/apis/tasks",
-        taskData
-      );
+      const { data } = await axios.post(`http://localhost:3000/apis/tasks`, taskData);
+      setTasks((prev) => [data, ...prev]);  //  Add the new task to state
       setIsAddingTask(false);
-      toast.dismiss(loadingToastId);
-      toast.success("Task Create Successfully!");
+      toast.success("Task created successfully");
     } catch (error) {
-      toast.dismiss(loadingToastId);
-      toast.error("Sorry Try again, could not Add Task");
-      setTasks((prevTasks) =>
-        prevTasks.filter((task) => task.task_id !== taskData.task_id)
-      );
-      console.error("Error adding task:", error.message || error);
+      toast.error("Failed to add task");
+      console.error("Error adding task:", error);
     }
   };
+  
 
   const handleMarkComplete = async (task) => {
     try {
@@ -261,7 +326,7 @@ function Objectives() {
     }
     const updatedTask = {
       ...taskToUPdate,
-      coming_from: targetSession,
+      moved_to: targetSession,
     };
 
     const newTasks = tasks.map((t) => (t.task_id === taskId ? updatedTask : t));
@@ -277,6 +342,7 @@ function Objectives() {
       );
 
       toast.success("Task moved successfully");
+      await fetchTasks(user.user_id, selectedProjectId);
     } catch (error) {
       toast.error("Sorry, could not move task. Please try again.");
       setTasks((prevTasks) =>
@@ -330,57 +396,59 @@ function Objectives() {
 
   return (
     <>
+ 
+
       <h1 className="text-2xl font-bold mb-6">Sessions</h1>
       <DndProvider backend={HTML5Backend}>
-        <div className="mx-30 max-h-[100vh] w-100">
+        <div className="mx-auto max-w-screen-xl max-h-[100vh] w-full px-4">
           {/* Header */}
           {/* Responsive Layout */}
           <div className="lg:hidden">
             {/* Horizontal Scrolling Tabs for Small Screens */}
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <div className="overflow-x-auto whitespace-nowrap pb-2">
-                <TabsList className="flex gap-2 w-max">
-                  {sessions.map((session) => (
-                    <TabsTrigger
-                      key={session.id}
-                      value={session.id}
-                      className="whitespace-nowrap"
-                    >
-                      {session.title}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-              {sessions.map((session) => (
-                <TabsContent key={session.id} value={session.id}>
-                  <SessionCard
-                    id={session.id}
-                    title={session.title}
-                    tasks={tasks.filter((task) => task.coming_from === session.id)}
-                    onAddTask={(sessionId) => {
-                      setSelectedSessionId(sessionId);
-                      setIsAddingTask(true);
-                    }}
-                    onTaskMove={handleTaskMove}
-                    handleTasksUpdated={handleTasksUpdated}
-                  >
-                    <SessionTasksList
-                      tasks={tasks.filter((task) => task.coming_from === session.id)}
-                      onDeleteTask={handleDeleteTask}
-                      onEditTask={handleEditTask}
-                      onViewTask={handleViewTask}
-                      onAddTag={handleAddTag}
-                      onMarkComplete={handleMarkComplete}
-                      onSetInProgress={handleSetInProgress}
-                      onMarkUncomplete={handleMarkUncomplete}
-                      showCompleteButton={session.id !== "current-tasks"} // Disable for current-tasks
-                      showInProgressOption={session.id !== "current-tasks"}
-                      // isLocked={lockStatus[session]}
-                    />
-                  </SessionCard>
-                </TabsContent>
-              ))}
-            </Tabs>
+            <Tabs value={selectedSessionId} onValueChange={setSelectedSessionId}>
+            <div className="overflow-x-auto whitespace-nowrap pb-2">
+              <TabsList className="flex gap-2 w-max">
+                {sessions.map((session) => (
+                  <TabsTrigger key={session.id} value={session.id}>
+                    {session.title}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+
+            {sessions.map((session) => (
+              <TabsContent key={session.id} value={session.id}>
+                <SessionCard
+                  id={session.id}
+                  title={session.title}
+                  // tasks={tasks.filter((task) => task.coming_from === session.id)}
+                  tasks={tasks.filter((task) => task.moved_to === session.id)}  //  Updated filter
+
+                  onAddTask={(sessionId) => {
+                    setSelectedSessionId(sessionId);  //  Track session
+                    setIsAddingTask(true);  // Open task form
+                  }}
+                >
+                  <SessionTasksList
+                    // tasks={tasks.filter((task) => task.coming_from === session.id)}
+                    tasks={tasks.filter((task) => task.moved_to === session.id)}  //  Updated filter
+
+                    onDeleteTask={handleDeleteTask}
+                    onEditTask={handleEditTask}     //  Added
+                    onAddTag={handleAddTag}         //  Added
+                    onViewTask={handleViewTask}
+                  />
+                </SessionCard>
+              </TabsContent>
+            ))}
+          </Tabs>
+          {isAddingTask && (
+            <TaskForm
+              onSubmit={handleAddTask}
+              onCancel={() => setIsAddingTask(false)}
+            />
+          )}
+
           </div>
 
           {/* Horizontal Scrolling for Larger Screens */}
@@ -390,7 +458,13 @@ function Objectives() {
                 key={session.id}
                 id={session.id}
                 title={session.title}
-                tasks={tasks.filter((task) => task.coming_from === session.id)}
+                // tasks={tasks.filter((task) => task.coming_from === session.id)}
+                tasks={
+                  session.id === "current-tasks"
+                    ? tasks.filter((task) => !task.moved_to || task.moved_to === "current-tasks")  // Includes new & moved tasks
+                    : tasks.filter((task) => task.moved_to === session.id)                         //  For other sessions
+                }
+                
                 className="min-w-[400px] max-w-[400px]"
                 onAddTask={(sessionId) => {
                   setSelectedSessionId(sessionId);
@@ -400,7 +474,13 @@ function Objectives() {
                 handleTasksUpdated={handleTasksUpdated}
               >
                 <SessionTasksList
-                  tasks={tasks.filter((task) => task.coming_from === session.id)}
+                  // tasks={tasks.filter((task) => task.coming_from === session.id)}
+                  tasks={
+                    session.id === "current-tasks"
+                      ? tasks.filter((task) => !task.moved_to || task.moved_to === "current-tasks")  //  Includes new & moved tasks
+                      : tasks.filter((task) => task.moved_to === session.id)                         //  For other sessions
+                  }
+                  
                   onDeleteTask={handleDeleteTask}
                   onEditTask={handleEditTask}
                   onAddTag={handleAddTag}

@@ -4,6 +4,8 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const projectRoutes = require("./routes/projectRoutes");
+
 require("dotenv").config();
 const pool = require("./db");
 const cron = require("node-cron");
@@ -43,7 +45,7 @@ app.use(express.json());
 app.use("/login", authRoutes);
 app.use("/apis/tasks", taskRoutes);
 app.use("/report", reportRoutes);
-
+app.use("/projects", projectRoutes)
 // Test route
 app.get("/", (req, res) => {
   res.send("Database connection and APIs are running fine!");

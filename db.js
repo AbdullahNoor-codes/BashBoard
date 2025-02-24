@@ -45,7 +45,7 @@ const poolConfig = {
 // Create a new Pool instance
 const pool = new Pool(poolConfig);
 
-// Test the database connection on startup
+// Test connection
 pool.connect((err, client, release) => {
   if (err) {
     console.error("Database connection error:", err.message);
@@ -55,40 +55,56 @@ pool.connect((err, client, release) => {
   release();
 });
 
+// Create tables
 const createTables = async () => {
   const usersTableQuery = `
     CREATE TABLE IF NOT EXISTS users (
-        user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        username VARCHAR(255) UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      username VARCHAR(255) UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );`;
+
+  const projectsTableQuery = `
+    CREATE TABLE IF NOT EXISTS projects (
+      project_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      project_name VARCHAR(255) NOT NULL,
+      user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (user_id, project_name)
+    );`;
+
   const tasksTableQuery = `
     CREATE TABLE IF NOT EXISTS tasks (
-        task_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        task_name VARCHAR(255) NOT NULL,
-        task_tags VARCHAR(255)[] DEFAULT ARRAY[]::VARCHAR[], -- Fixed array syntax
-        task_desc TEXT,
-        date TIMESTAMP WITH TIME ZONE,
-        coming_from VARCHAR(255),
-        is_in_progress BOOLEAN DEFAULT FALSE,
-        is_complete BOOLEAN DEFAULT FALSE,
-        moved_to VARCHAR(255),
-        user_id UUID REFERENCES users(user_id) ON DELETE CASCADE
+      task_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      task_name VARCHAR(255) NOT NULL,
+      task_tags VARCHAR(255)[] DEFAULT ARRAY[]::VARCHAR[],
+      task_desc TEXT,
+      date TIMESTAMP WITH TIME ZONE,
+      coming_from VARCHAR(255),
+      is_in_progress BOOLEAN DEFAULT FALSE,
+      is_complete BOOLEAN DEFAULT FALSE,
+      moved_to VARCHAR(255),
+      user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+      project_id UUID REFERENCES projects(project_id) ON DELETE CASCADE
     );`;
+
   const reportQuery = `
     CREATE TABLE IF NOT EXISTS reports (
-    report_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
-    date DATE NOT NULL,
-    data JSONB NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user_id, date) -- Add this line to enforce uniqueness
-);`;
+      report_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID REFERENCES users(user_id) ON DELETE CASCADE,
+      date DATE NOT NULL,
+      data JSONB NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (user_id, date)
+    );`;
 
   try {
     await pool.query(usersTableQuery);
     console.log("Users table created successfully.");
+
+    await pool.query(projectsTableQuery);
+    console.log("Projects table created successfully.");
 
     await pool.query(tasksTableQuery);
     console.log("Tasks table created successfully.");
@@ -100,7 +116,7 @@ const createTables = async () => {
   }
 };
 
-// Run table creation on startup
+// Initialize tables at startup
 createTables();
 
 module.exports = pool;

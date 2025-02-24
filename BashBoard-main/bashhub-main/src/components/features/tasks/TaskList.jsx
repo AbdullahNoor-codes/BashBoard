@@ -48,6 +48,7 @@ function TaskList({ tasks, onEdit, onView, onMove, onDelete, onAddTag }) {
               >
                 {task.task_desc}
               </div>
+              
               <div className="flex flex-wrap gap-2 mt-1">
                 {task.task_tags && task.task_tags.length > 0 ? (
                   task.task_tags.map((tag, index) => (

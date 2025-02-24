@@ -59,7 +59,6 @@
 // src/components/layout/Layout.jsx
 import React from 'react';
 import Sidebar from './Sidebar';
-import NavBar from './NavBar';
 import { Toaster } from 'sonner';
 
 function Layout({ children }) {
@@ -67,7 +66,6 @@ function Layout({ children }) {
     <div className="flex flex-col lg:flex-row min-h-screen" style={{ backgroundColor: "#F3F4F6" }}>
       <Sidebar />
       <div className="flex-1">
-        <NavBar />
         <main className="flex-1 max-h-[100vh] overflow-auto p-4 lg:p-8 pt-20 lg:pt-20">
           {children}
           <Toaster />
