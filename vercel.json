@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "crons": [
+    {
+      "path": "/api/send-reports",
+      "schedule": "19 6 * * *"
+    }
+  ],
+  "builds": [{ "src": "index.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "/" }]
+}
